@@ -1,0 +1,39 @@
+import { type ReactNode } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import VoiceChatPage from './pages/VoiceChatPage';
+import { useAuthStore } from './store/useAuthStore';
+
+const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  const { isAuthenticated } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+};
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/dashboard/*"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/voice-chat" element={<VoiceChatPage />} />
+        </Routes>
+      </Router>
+    </QueryClientProvider>
+  );
+}
+
+export default App;

@@ -1,0 +1,69 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  --color-primary: #10b981; /* Emerald / Agriculture */
+  --color-primary-dark: #059669;
+  --color-secondary: #0ea5e9; /* Sky Blue / Drone */
+  --color-accent: #f59e0b; /* Amber / Harvesting */
+  --color-bg-light: #0b1730;    /* Dark Navy */
+  --color-bg-dark: #0d1c3a;     /* Slightly deeper Navy */
+  --color-surface: #0f2047;     /* Navy card surface */
+  --color-text-main: #e2e8f0;   /* Slate 200 for dark bg */
+  --color-text-dim: #94a3b8;    /* Slate 400 */
+  --color-border-light: rgba(30, 58, 138, 0.4); /* Navy border */
+  
+  --font-outfit: "Outfit", sans-serif;
+  --font-cyber: "Manrope", sans-serif;
+
+  --animate-pulse-slow: pulse 4s infinite ease-in-out;
+}
+
+body {
+  background-color: var(--color-bg-light);
+  color: var(--color-text-main);
+  font-family: var(--font-outfit);
+  overflow-x: hidden;
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(at top left, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+    radial-gradient(at bottom right, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+}
+
+.glass {
+  background-color: rgba(15, 32, 71, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 64, 175, 0.3);
+  box-shadow: 0 10px 30px -5px rgba(14, 165, 233, 0.1);
+  border-radius: 1.5rem;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 32, 71, 0.5);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.4);
+  border-radius: 10px;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1c3a;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary-dark);
+  border-radius: 4px;
+}
