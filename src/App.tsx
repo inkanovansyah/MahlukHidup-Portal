@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import VoiceChatPage from './pages/VoiceChatPage';
 import { useAuthStore } from './store/useAuthStore';
 
 const queryClient = new QueryClient();
@@ -29,7 +28,6 @@ function App() {
             }
           />
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/voice-chat" element={<VoiceChatPage />} />
         </Routes>
       </Router>
     </QueryClientProvider>
