@@ -5,6 +5,22 @@ import {
 } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import { Input } from '../components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '../components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 interface UserDto {
   id: number;
@@ -105,6 +121,7 @@ const UserManagement = () => {
   };
 
   return (
+    <>
     <div className="p-4 md:p-6 lg:p-10 h-full overflow-y-auto custom-scrollbar bg-[#0b1730]">
       {/* Header */}
       <div className="mb-6 md:mb-10">
@@ -180,12 +197,12 @@ const UserManagement = () => {
       <div className="mb-6">
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder="Cari user..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+            className="pl-12"
           />
         </div>
       </div>
@@ -284,97 +301,91 @@ const UserManagement = () => {
             </table>
           </div>
         </Card>
+      </div>
 
       {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0d1f47] border border-blue-800/40 rounded-xl shadow-2xl">
-            <div className="sticky top-0 bg-[#0d1f47] border-b border-blue-800/30 p-4 md:p-6 flex items-center justify-between z-10">
-              <h3 className="text-lg font-black text-white uppercase font-cyber italic flex items-center gap-2">
-                <Key size={18} className="text-emerald-400" />
-                {editingUser ? 'Edit User' : 'Tambah User Baru'}
-              </h3>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors text-slate-400 hover:text-white">
-                <X size={18} />
-              </button>
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent>
+          <DialogHeader className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <Key size={18} className="text-emerald-400" />
+              {editingUser ? 'Edit User' : 'Tambah User Baru'}
+            </DialogTitle>
+            <DialogClose />
+          </DialogHeader>
+          <form onSubmit={handleSave} className="p-4 md:p-6 space-y-4">
+            <div>
+              <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                Nama Lengkap <span className="text-red-400">*</span>
+              </label>
+              <Input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Masukkan nama lengkap"
+                required
+              />
             </div>
-            <form onSubmit={handleSave} className="p-4 md:p-6 space-y-4">
-              <div>
-                <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                  Nama Lengkap <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                  placeholder="Masukkan nama lengkap"
-                  required
-                />
-              </div>
 
-              <div>
-                <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                  Email <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                  placeholder="email@domain.com"
-                  required
-                  disabled={!!editingUser}
-                />
-              </div>
+            <div>
+              <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                Email <span className="text-red-400">*</span>
+              </label>
+              <Input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="email@domain.com"
+                required
+                disabled={!!editingUser}
+              />
+            </div>
 
-              <div>
-                <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                  Role <span className="text-red-400">*</span>
-                </label>
-                <select
-                  value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                  required
-                >
+            <div>
+              <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                Role <span className="text-red-400">*</span>
+              </label>
+              <Select value={form.role} onValueChange={(value) => setForm({ ...form, role: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
                   {availableRoles.map(role => (
-                    <option key={role} value={role}>{role}</option>
+                    <SelectItem key={role} value={role}>{role}</SelectItem>
                   ))}
-                </select>
-              </div>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {!editingUser && (
-                <div>
-                  <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                    Password <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="password"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                    placeholder="Minimal 6 karakter"
-                    required
-                    minLength={6}
-                  />
-                </div>
-              )}
-
-              <div className="flex gap-3 pt-4">
-                <Button type="button" variant="ghost" fullWidth onClick={() => setShowModal(false)}>
-                  Batal
-                </Button>
-                <Button type="submit" variant="primary" fullWidth>
-                  <Check size={16} />
-                  {editingUser ? 'Update' : 'Simpan'}
-                </Button>
+            {!editingUser && (
+              <div>
+                <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                  Password <span className="text-red-400">*</span>
+                </label>
+                <Input
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="Minimal 6 karakter"
+                  required
+                  minLength={6}
+                />
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+            )}
+
+            <DialogFooter>
+              <Button type="button" variant="ghost" fullWidth onClick={() => setShowModal(false)}>
+                Batal
+              </Button>
+              <Button type="submit" variant="primary" fullWidth>
+                <Check size={16} />
+                {editingUser ? 'Update' : 'Simpan'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

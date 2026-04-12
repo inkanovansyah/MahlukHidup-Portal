@@ -7,6 +7,14 @@ import { companyApi, branchApi } from '../api/company.api';
 import type { CompanyDto, BranchDto, CompanyCreateDto, BranchCreateDto } from '../types/company.types';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import { Input } from '../components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../components/ui/dialog';
 
 const CompanyManagement = () => {
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
@@ -176,6 +184,7 @@ const CompanyManagement = () => {
   };
 
   return (
+    <>
     <div className="p-4 md:p-6 lg:p-10 h-full overflow-y-auto custom-scrollbar bg-[#0b1730]">
       {/* Header */}
       <div className="mb-6 md:mb-10">
@@ -215,13 +224,13 @@ const CompanyManagement = () => {
       {/* Search Bar */}
       <div className="mb-6">
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
+          <Input
             type="text"
             placeholder="Cari perusahaan..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+            className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
           />
         </div>
       </div>
@@ -343,30 +352,33 @@ const CompanyManagement = () => {
           )}
         </div>
       )}
+    </div>
 
       {/* Company Modal */}
-      {showCompanyModal && (
-        <Modal
-          title={editingCompany ? 'Edit Perusahaan' : 'Tambah Perusahaan'}
-          onClose={() => setShowCompanyModal(false)}
-        >
+      <Dialog open={showCompanyModal} onOpenChange={setShowCompanyModal}>
+        <DialogContent className="max-w-2xl bg-[#0d1f47] border border-blue-800/40 text-white rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg md:text-xl font-black text-white uppercase font-cyber italic">
+              {editingCompany ? 'Edit Perusahaan' : 'Tambah Perusahaan'}
+            </DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleSaveCompany} className="space-y-4">
             <FormField label="Nama Perusahaan" required>
-              <input
+              <Input
                 type="text"
                 value={companyForm.name}
                 onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
               />
             </FormField>
 
             <FormField label="Kode" required>
-              <input
+              <Input
                 type="text"
                 value={companyForm.code}
                 onChange={(e) => setCompanyForm({ ...companyForm, code: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
                 disabled={!!editingCompany}
               />
@@ -383,20 +395,20 @@ const CompanyManagement = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField label="Email">
-                <input
+                <Input
                   type="email"
                   value={companyForm.email || ''}
                   onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
 
               <FormField label="Telepon">
-                <input
+                <Input
                   type="text"
                   value={companyForm.phone || ''}
                   onChange={(e) => setCompanyForm({ ...companyForm, phone: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
             </div>
@@ -410,7 +422,7 @@ const CompanyManagement = () => {
               />
             </FormField>
 
-            <div className="flex gap-3 pt-4">
+            <DialogFooter className="flex gap-3 pt-4 sm:flex-row">
               <Button type="button" variant="ghost" fullWidth onClick={() => setShowCompanyModal(false)}>
                 Batal
               </Button>
@@ -418,34 +430,36 @@ const CompanyManagement = () => {
                 <Check size={16} />
                 Simpan
               </Button>
-            </div>
+            </DialogFooter>
           </form>
-        </Modal>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Branch Modal */}
-      {showBranchModal && selectedCompanyId && (
-        <Modal
-          title={editingBranch ? 'Edit Cabang' : 'Tambah Cabang'}
-          onClose={() => setShowBranchModal(false)}
-        >
+      <Dialog open={showBranchModal && !!selectedCompanyId} onOpenChange={(open) => { if (!open) setShowBranchModal(false); }}>
+        <DialogContent className="max-w-2xl bg-[#0d1f47] border border-blue-800/40 text-white rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg md:text-xl font-black text-white uppercase font-cyber italic">
+              {editingBranch ? 'Edit Cabang' : 'Tambah Cabang'}
+            </DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleSaveBranch} className="space-y-4">
             <FormField label="Nama Cabang" required>
-              <input
+              <Input
                 type="text"
                 value={branchForm.name}
                 onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
               />
             </FormField>
 
             <FormField label="Kode" required>
-              <input
+              <Input
                 type="text"
                 value={branchForm.code}
                 onChange={(e) => setBranchForm({ ...branchForm, code: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
                 disabled={!!editingBranch}
               />
@@ -462,47 +476,47 @@ const CompanyManagement = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField label="Email">
-                <input
+                <Input
                   type="email"
                   value={branchForm.email || ''}
                   onChange={(e) => setBranchForm({ ...branchForm, email: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
 
               <FormField label="Telepon">
-                <input
+                <Input
                   type="text"
                   value={branchForm.phone || ''}
                   onChange={(e) => setBranchForm({ ...branchForm, phone: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <FormField label="Latitude">
-                <input
+                <Input
                   type="number"
                   step="any"
                   value={branchForm.latitude || ''}
                   onChange={(e) => setBranchForm({ ...branchForm, latitude: e.target.value ? parseFloat(e.target.value) : undefined })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
 
               <FormField label="Longitude">
-                <input
+                <Input
                   type="number"
                   step="any"
                   value={branchForm.longitude || ''}
                   onChange={(e) => setBranchForm({ ...branchForm, longitude: e.target.value ? parseFloat(e.target.value) : undefined })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
             </div>
 
-            <div className="flex gap-3 pt-4">
+            <DialogFooter className="flex gap-3 pt-4 sm:flex-row">
               <Button type="button" variant="ghost" fullWidth onClick={() => setShowBranchModal(false)}>
                 Batal
               </Button>
@@ -510,11 +524,11 @@ const CompanyManagement = () => {
                 <Check size={16} />
                 Simpan
               </Button>
-            </div>
+            </DialogFooter>
           </form>
-        </Modal>
-      )}
-    </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
@@ -560,25 +574,6 @@ const BranchCard = ({ branch, onEdit, onDelete }: { branch: BranchDto; onEdit: (
           >
             <Trash2 size={12} />
           </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Modal Component
-const Modal = ({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) => {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0d1f47] border border-blue-800/40 rounded-2xl shadow-2xl">
-        <div className="sticky top-0 bg-[#0d1f47] border-b border-blue-800/30 p-4 md:p-6 flex items-center justify-between z-10">
-          <h3 className="text-lg md:text-xl font-black text-white uppercase font-cyber italic">{title}</h3>
-          <button onClick={onClose} className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors text-slate-400 hover:text-white">
-            <X size={18} />
-          </button>
-        </div>
-        <div className="p-4 md:p-6">
-          {children}
         </div>
       </div>
     </div>
