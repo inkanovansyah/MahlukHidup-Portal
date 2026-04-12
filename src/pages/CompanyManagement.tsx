@@ -7,6 +7,14 @@ import { companyApi, branchApi } from '../api/company.api';
 import type { CompanyDto, BranchDto, CompanyCreateDto, BranchCreateDto } from '../types/company.types';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import Input from '../components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../components/ui/dialog';
 
 const CompanyManagement = () => {
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
@@ -215,13 +223,13 @@ const CompanyManagement = () => {
       {/* Search Bar */}
       <div className="mb-6">
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
+          <Input
             type="text"
             placeholder="Cari perusahaan..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+            className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl pl-12 pr-4 py-6 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
           />
         </div>
       </div>
@@ -345,28 +353,30 @@ const CompanyManagement = () => {
       )}
 
       {/* Company Modal */}
-      {showCompanyModal && (
-        <Modal
-          title={editingCompany ? 'Edit Perusahaan' : 'Tambah Perusahaan'}
-          onClose={() => setShowCompanyModal(false)}
-        >
+      <Dialog open={showCompanyModal} onOpenChange={setShowCompanyModal}>
+        <DialogContent className="max-w-2xl bg-[#0d1f47] border border-blue-800/40 text-white rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg md:text-xl font-black text-white uppercase font-cyber italic">
+              {editingCompany ? 'Edit Perusahaan' : 'Tambah Perusahaan'}
+            </DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleSaveCompany} className="space-y-4">
             <FormField label="Nama Perusahaan" required>
-              <input
+              <Input
                 type="text"
                 value={companyForm.name}
                 onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
               />
             </FormField>
 
             <FormField label="Kode" required>
-              <input
+              <Input
                 type="text"
                 value={companyForm.code}
                 onChange={(e) => setCompanyForm({ ...companyForm, code: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
                 disabled={!!editingCompany}
               />
@@ -383,20 +393,20 @@ const CompanyManagement = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField label="Email">
-                <input
+                <Input
                   type="email"
                   value={companyForm.email || ''}
                   onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
 
               <FormField label="Telepon">
-                <input
+                <Input
                   type="text"
                   value={companyForm.phone || ''}
                   onChange={(e) => setCompanyForm({ ...companyForm, phone: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
             </div>
@@ -410,7 +420,7 @@ const CompanyManagement = () => {
               />
             </FormField>
 
-            <div className="flex gap-3 pt-4">
+            <DialogFooter className="flex gap-3 pt-4 sm:flex-row">
               <Button type="button" variant="ghost" fullWidth onClick={() => setShowCompanyModal(false)}>
                 Batal
               </Button>
@@ -418,10 +428,10 @@ const CompanyManagement = () => {
                 <Check size={16} />
                 Simpan
               </Button>
-            </div>
+            </DialogFooter>
           </form>
-        </Modal>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Branch Modal */}
       {showBranchModal && selectedCompanyId && (

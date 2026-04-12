@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
-  Sprout, Globe, Power, ChevronRight, Navigation,
+  Sprout, Globe, Power, Navigation,
   BarChart3, AlertTriangle, ShieldCheck, CheckCircle2,
   Zap, Droplet, Leaf, Layers, Coins,
   Info, Camera, Sparkles, TrendingUp, TrendingDown, ThermometerSun,
   Bug, FlaskConical, Building2, Wheat, AlertOctagon,
-  Clock, ArrowUpRight, ArrowDownRight, Eye, Activity, MapPin, Users
+  Clock, ArrowUpRight, ArrowDownRight, Eye, Activity, MapPin, Users, Menu, X,
+  Plus, Trash2, Filter, ChevronLeft, ChevronRight, Wallet
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +16,33 @@ import MapView from '../components/ui/MapView';
 import CompanyManagement from './CompanyManagement';
 import UserManagement from './UserManagement';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart as RechartsBarChart, Bar, LineChart, Line } from 'recharts';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '../components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
+import { Input } from '../components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
+import type { Expense } from '../types/expense.types';
+import { EXPENSE_CATEGORY_LABELS } from '../types/expense.types';
 
 const mockMarkers: any[] = [
   { 
@@ -234,10 +262,71 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('monitoring');
   const [activeSector, setActiveSector] = useState(mockMarkers[0]);
   const [mounted, setMounted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Expense states
+  const [expenses, setExpenses] = useState<Expense[]>([
+    { id: '1', category: 'lahan', description: 'Pembelian Pupuk NPK 50kg', amount: 750000, date: '2026-06-01' },
+    { id: '2', category: 'transportasi', description: 'Sewa Truk Pengangkut Hasil Panen', amount: 1200000, date: '2026-06-03' },
+    { id: '3', category: 'lahan', description: 'Pembelian Pestisida Organik', amount: 450000, date: '2026-06-05' },
+    { id: '4', category: 'lahan', description: 'Sewa Lahan Tambahan Sektor D', amount: 3000000, date: '2026-06-07' },
+    { id: '5', category: 'transportasi', description: 'Bensin Drone Penyemprot', amount: 350000, date: '2026-06-08' },
+    { id: '6', category: 'lahan', description: 'Pembelian Bibit Tomat Ceri', amount: 850000, date: '2026-06-10' },
+    { id: '7', category: 'transportasi', description: 'Transportasi Distribusi ke Pasar', amount: 650000, date: '2026-06-12' },
+    { id: '8', category: 'lahan', description: 'Perbaikan Sistem Irigasi', amount: 2100000, date: '2026-06-14' },
+    { id: '9', category: 'lahan', description: 'Pembelian Alat Pertanian', amount: 980000, date: '2026-06-15' },
+    { id: '10', category: 'transportasi', description: 'Sewa Mobil Pengangkut Pupuk', amount: 550000, date: '2026-06-17' },
+    { id: '11', category: 'lahan', description: 'Pembelian Mulsa Plastik', amount: 320000, date: '2026-06-18' },
+    { id: '12', category: 'transportasi', description: 'Biaya Tol Distribusi', amount: 180000, date: '2026-06-19' },
+  ]);
+  const [expensePage, setExpensePage] = useState(1);
+  const [expenseLimit] = useState(5);
+  const [expenseFilter, setExpenseFilter] = useState<string>('all');
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const [newExpense, setNewExpense] = useState({ category: 'lahan' as Expense['category'], description: '', amount: '', date: '' });
 
   useEffect(() => { setMounted(true); }, []);
 
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  // Expense handlers
+  const handleAddExpense = () => {
+    if (!newExpense.description || !newExpense.amount || !newExpense.date) return;
+    const expense: Expense = {
+      id: String(expenses.length + 1),
+      category: newExpense.category,
+      description: newExpense.description,
+      amount: Number(newExpense.amount),
+      date: newExpense.date,
+    };
+    setExpenses([expense, ...expenses]);
+    setNewExpense({ category: 'lahan', description: '', amount: '', date: '' });
+    setIsAddExpenseOpen(false);
+  };
+
+  const handleDeleteExpense = (id: string) => {
+    setExpenses(expenses.filter((e) => e.id !== id));
+  };
+
+  const filteredExpenses = expenseFilter === 'all'
+    ? expenses
+    : expenses.filter((e) => e.category === expenseFilter);
+
+  const totalPages = Math.ceil(filteredExpenses.length / expenseLimit);
+  const paginatedExpenses = filteredExpenses.slice(
+    (expensePage - 1) * expenseLimit,
+    expensePage * expenseLimit
+  );
+
+  const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
 
   if (!mounted) return <div className="h-screen w-full bg-[#0b1730] flex items-center justify-center"><Sprout className="text-emerald-500 animate-bounce" size={48} /></div>;
 
@@ -252,25 +341,44 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen w-full bg-[#0b1730] flex text-slate-200 font-outfit overflow-hidden relative">
-      {/* SOLID SIDEBAR */}
-      <aside className="w-16 lg:w-56 h-screen z-50 bg-[#0d1f47] border-r border-blue-900/40 flex flex-col py-6 transition-all duration-700 flex-shrink-0 shadow-2xl shadow-black/30 relative">
-        <div className="flex items-center gap-3 mb-8 px-5">
-          <div className="w-9 h-9 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0">
-            <Sprout size={20} />
+      {/* MOBILE OVERLAY */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* SIDEBAR - Responsive: hidden on mobile, shown on lg */}
+      <aside className={`fixed lg:relative inset-y-0 left-0 w-64 lg:w-56 h-screen z-50 bg-[#0d1f47] border-r border-blue-900/40 flex flex-col py-6 transition-all duration-700 flex-shrink-0 shadow-2xl shadow-black/30 ${
+        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        <div className="flex items-center justify-between gap-3 mb-8 px-5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0">
+              <Sprout size={20} />
+            </div>
+            <div className="hidden lg:block">
+              <h1 className="font-black text-base tracking-tighter text-white leading-none font-cyber italic">MH <span className="text-emerald-400">PRO</span></h1>
+              <p className="text-[8px] font-bold text-blue-400/70 uppercase tracking-[0.3em] mt-0.5 italic">Intelligence</p>
+            </div>
           </div>
-          <div className="hidden lg:block">
-            <h1 className="font-black text-base tracking-tighter text-white leading-none font-cyber italic">MH <span className="text-emerald-400">PRO</span></h1>
-            <p className="text-[8px] font-bold text-blue-400/70 uppercase tracking-[0.3em] mt-0.5 italic">Intelligence</p>
-          </div>
+          {/* Close button for mobile */}
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="lg:hidden p-1 text-blue-300 hover:text-white"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 w-full space-y-1 px-3">
           {[
-            { id: 'monitoring', label: 'Monitor Geospasial', icon: Globe, action: () => setActiveTab('monitoring') },
-            { id: 'analytics', label: 'Analitik Keseluruhan', icon: BarChart3, action: () => setActiveTab('analytics') },
-            { id: 'drones', label: 'Analisa Drone', icon: Navigation, action: () => setActiveTab('drones') },
-            { id: 'companies', label: 'Manajemen Perusahaan', icon: Building2, action: () => setActiveTab('companies') },
-            { id: 'users', label: 'Manajemen User', icon: Users, action: () => setActiveTab('users') },
+            { id: 'monitoring', label: 'Monitor Geospasial', icon: Globe, action: () => { setActiveTab('monitoring'); setIsMobileMenuOpen(false); } },
+            { id: 'analytics', label: 'Analitik Keseluruhan', icon: BarChart3, action: () => { setActiveTab('analytics'); setIsMobileMenuOpen(false); } },
+            { id: 'drones', label: 'Analisa Drone', icon: Navigation, action: () => { setActiveTab('drones'); setIsMobileMenuOpen(false); } },
+            { id: 'companies', label: 'Manajemen Perusahaan', icon: Building2, action: () => { setActiveTab('companies'); setIsMobileMenuOpen(false); } },
+            { id: 'users', label: 'Manajemen User', icon: Users, action: () => { setActiveTab('users'); setIsMobileMenuOpen(false); } },
           ].map((item) => (
             <button
               key={item.id}
@@ -278,7 +386,7 @@ const Dashboard = () => {
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-500 group relative ${activeTab === item.id ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25' : 'text-blue-300/70 hover:text-white hover:bg-blue-800/30'}`}
             >
               <item.icon size={18} className={`flex-shrink-0 ${activeTab === item.id ? 'scale-110' : 'group-hover:rotate-12 outline-none'} transition-transform`} />
-              <span className="hidden lg:block font-bold text-xs tracking-wide">{item.label}</span>
+              <span className="font-bold text-xs tracking-wide">{item.label}</span>
             </button>
           ))}
         </nav>
@@ -295,8 +403,14 @@ const Dashboard = () => {
 
         {/* TOP NAVBAR */}
         <header className="h-14 bg-[#0d1f47] border-b border-blue-900/40 flex items-center justify-between px-4 lg:px-6 flex-shrink-0 z-40">
-          {/* Left: Page Title */}
-          <div>
+          {/* Left: Burger Menu (mobile) + Page Title */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 bg-blue-900/20 hover:bg-blue-900/30 border border-blue-900/40 rounded-lg transition-all text-blue-300 hover:text-white"
+            >
+              {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
             <h2 className="text-sm font-black text-white uppercase font-cyber italic tracking-tight">
               {activeTab === 'monitoring' && 'MONITOR GEOSPASIAL'}
               {activeTab === 'analytics' && 'ANALITIK KESELURUHAN'}
@@ -984,6 +1098,204 @@ const Dashboard = () => {
                  </div>
                </Card>
              </div>
+
+             {/* ROW 5: TOTAL PENGELUARAN TABLE */}
+             <Card className="shadow-xl mb-8" padding={true}>
+               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                 <div className="flex items-center gap-3">
+                   <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-lg"><Wallet size={20} /></div>
+                   <div>
+                     <h3 className="font-black text-sm tracking-widest uppercase text-white italic">Total Pengeluaran</h3>
+                     <p className="text-[9px] text-blue-400/70 mt-0.5 uppercase font-bold">Kebutuhan Lahan & Transportasi</p>
+                   </div>
+                 </div>
+                 <div className="flex items-center gap-3">
+                   {/* Filter */}
+                   <div className="flex items-center gap-2">
+                     <Filter size={14} className="text-blue-400" />
+                     <Select value={expenseFilter} onValueChange={(val) => { setExpenseFilter(val); setExpensePage(1); }}>
+                       <SelectTrigger className="w-[180px] h-8 text-xs">
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="all">Semua Kategori</SelectItem>
+                         <SelectItem value="lahan">Kebutuhan Lahan</SelectItem>
+                         <SelectItem value="transportasi">Transportasi</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+                   {/* Add Expense Button */}
+                   <Dialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen}>
+                     <DialogTrigger asChild>
+                       <Button size="sm" className="h-8 gap-1">
+                         <Plus size={14} />
+                         Tambah
+                       </Button>
+                     </DialogTrigger>
+                     <DialogContent className="sm:max-w-[500px]">
+                       <DialogHeader>
+                         <DialogTitle className="text-white">Tambah Pengeluaran Baru</DialogTitle>
+                         <DialogDescription>Tambahkan data pengeluaran untuk kebutuhan lahan atau transportasi.</DialogDescription>
+                       </DialogHeader>
+                       <div className="grid gap-4 py-4">
+                         <div className="grid grid-cols-4 items-center gap-4">
+                           <label className="text-right text-sm font-medium text-slate-300">Kategori</label>
+                           <Select value={newExpense.category} onValueChange={(val: any) => setNewExpense({ ...newExpense, category: val })}>
+                             <SelectTrigger className="col-span-3 h-9">
+                               <SelectValue />
+                             </SelectTrigger>
+                             <SelectContent>
+                               <SelectItem value="lahan">Kebutuhan Lahan</SelectItem>
+                               <SelectItem value="transportasi">Transportasi</SelectItem>
+                             </SelectContent>
+                           </Select>
+                         </div>
+                         <div className="grid grid-cols-4 items-center gap-4">
+                           <label className="text-right text-sm font-medium text-slate-300">Deskripsi</label>
+                           <Input
+                             className="col-span-3 h-9"
+                             placeholder="Contoh: Pembelian Pupuk NPK"
+                             value={newExpense.description}
+                             onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
+                           />
+                         </div>
+                         <div className="grid grid-cols-4 items-center gap-4">
+                           <label className="text-right text-sm font-medium text-slate-300">Jumlah (Rp)</label>
+                           <Input
+                             className="col-span-3 h-9"
+                             type="number"
+                             placeholder="0"
+                             value={newExpense.amount}
+                             onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+                           />
+                         </div>
+                         <div className="grid grid-cols-4 items-center gap-4">
+                           <label className="text-right text-sm font-medium text-slate-300">Tanggal</label>
+                           <Input
+                             className="col-span-3 h-9"
+                             type="date"
+                             value={newExpense.date}
+                             onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
+                           />
+                         </div>
+                       </div>
+                       <DialogFooter>
+                         <Button variant="ghost" onClick={() => setIsAddExpenseOpen(false)}>Batal</Button>
+                         <Button onClick={handleAddExpense}>Simpan</Button>
+                       </DialogFooter>
+                     </DialogContent>
+                   </Dialog>
+                 </div>
+               </div>
+
+               {/* Total Summary */}
+               <div className="mb-4 p-4 bg-gradient-to-r from-emerald-500/10 to-sky-500/10 border border-emerald-500/20 rounded-lg">
+                 <div className="flex items-center justify-between">
+                   <div>
+                     <p className="text-[10px] font-black text-blue-400/70 uppercase tracking-widest">Total Pengeluaran ({filteredExpenses.length} item)</p>
+                     <p className="text-2xl font-black text-white mt-1">{formatCurrency(totalExpenses)}</p>
+                   </div>
+                   <div className="text-right">
+                     <p className="text-[10px] font-black text-blue-400/70 uppercase tracking-widest">Rata-rata per Item</p>
+                     <p className="text-lg font-black text-emerald-400 mt-1">
+                       {formatCurrency(filteredExpenses.length > 0 ? totalExpenses / filteredExpenses.length : 0)}
+                     </p>
+                   </div>
+                 </div>
+               </div>
+
+               {/* Table */}
+               <div className="rounded-lg border border-blue-900/40 overflow-hidden">
+                 <Table>
+                   <TableHeader>
+                     <TableRow className="border-blue-900/40 hover:bg-blue-900/20">
+                       <TableHead className="w-[60px]">No</TableHead>
+                       <TableHead className="w-[120px]">Kategori</TableHead>
+                       <TableHead>Deskripsi</TableHead>
+                       <TableHead className="w-[120px]">Tanggal</TableHead>
+                       <TableHead className="text-right w-[150px]">Jumlah</TableHead>
+                       <TableHead className="text-center w-[80px]">Aksi</TableHead>
+                     </TableRow>
+                   </TableHeader>
+                   <TableBody>
+                     {paginatedExpenses.length === 0 ? (
+                       <TableRow className="border-blue-900/40">
+                         <TableCell colSpan={6} className="text-center py-8 text-slate-400">
+                           Tidak ada data pengeluaran
+                         </TableCell>
+                       </TableRow>
+                     ) : (
+                       paginatedExpenses.map((expense, index) => (
+                         <TableRow key={expense.id} className="border-blue-900/40 hover:bg-blue-900/20">
+                           <TableCell className="font-medium text-slate-400">
+                             {(expensePage - 1) * expenseLimit + index + 1}
+                           </TableCell>
+                           <TableCell>
+                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                               expense.category === 'lahan'
+                                 ? 'bg-emerald-500/20 text-emerald-400'
+                                 : 'bg-sky-500/20 text-sky-400'
+                             }`}>
+                               {EXPENSE_CATEGORY_LABELS[expense.category]}
+                             </span>
+                           </TableCell>
+                           <TableCell className="font-medium text-white">{expense.description}</TableCell>
+                           <TableCell className="text-slate-400 text-sm">{formatDate(expense.date)}</TableCell>
+                           <TableCell className="text-right font-black text-white">{formatCurrency(expense.amount)}</TableCell>
+                           <TableCell className="text-center">
+                             <button
+                               onClick={() => handleDeleteExpense(expense.id)}
+                               className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded transition-all"
+                               title="Hapus"
+                             >
+                               <Trash2 size={14} />
+                             </button>
+                           </TableCell>
+                         </TableRow>
+                       ))
+                     )}
+                   </TableBody>
+                 </Table>
+               </div>
+
+               {/* Pagination */}
+               {totalPages > 1 && (
+                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-blue-900/40">
+                   <p className="text-xs text-slate-400">
+                     Menampilkan {((expensePage - 1) * expenseLimit) + 1}-{Math.min(expensePage * expenseLimit, filteredExpenses.length)} dari {filteredExpenses.length} data
+                   </p>
+                   <div className="flex items-center gap-2">
+                     <button
+                       disabled={expensePage === 1}
+                       onClick={() => setExpensePage(expensePage - 1)}
+                       className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-blue-900/40 text-slate-400 hover:text-white hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                     >
+                       <ChevronLeft size={14} />
+                     </button>
+                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                       <button
+                         key={page}
+                         onClick={() => setExpensePage(page)}
+                         className={`h-8 w-8 flex items-center justify-center rounded-md text-sm font-medium transition-all ${
+                           page === expensePage
+                             ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                             : 'border border-blue-900/40 text-slate-400 hover:text-white hover:bg-blue-900/30'
+                         }`}
+                       >
+                         {page}
+                       </button>
+                     ))}
+                     <button
+                       disabled={expensePage === totalPages}
+                       onClick={() => setExpensePage(expensePage + 1)}
+                       className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-blue-900/40 text-slate-400 hover:text-white hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                     >
+                       <ChevronRight size={14} />
+                     </button>
+                   </div>
+                 </div>
+               )}
+             </Card>
 
              {/* ROW 6: AI Insights Summary */}
              <Card className="shadow-xl mb-8 bg-gradient-to-br from-blue-900/40 to-slate-900/40 border border-blue-700/30" padding={true}>

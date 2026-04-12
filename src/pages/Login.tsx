@@ -6,6 +6,7 @@ import { authApi } from '../api/auth.api';
 import { Sprout, ShieldCheck, ChevronRight, Mail, Lock, AlertCircle } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import { Input } from '../components/ui/input';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -155,14 +156,14 @@ const Login = () => {
                 <div className="space-y-1.5">
                   <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em] ml-1">ID Pengenal</label>
                   <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={16} />
-                    <input
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors z-10" size={16} />
+                    <Input
                       type="email"
                       name="email"
                       value={email}
                       onChange={handleInputChange}
                       placeholder="admin@mahlukhidup.id"
-                      className={`w-full bg-slate-50 border ${errors.email ? 'border-red-400' : 'border-slate-100'} pl-11 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 ${errors.email ? 'focus:ring-red-500/20' : 'focus:ring-emerald-500/20'} text-slate-700 placeholder-slate-300 transition-all font-medium text-sm`}
+                      className={`w-full bg-slate-50 border ${errors.email ? 'border-red-400' : 'border-slate-100'} pl-11 pr-4 py-3 h-auto rounded-xl focus:outline-none focus:ring-2 ${errors.email ? 'focus:ring-red-500/20' : 'focus:ring-emerald-500/20'} text-slate-700 placeholder-slate-300 transition-all font-medium text-sm`}
                       aria-invalid={!!errors.email}
                       aria-describedby={errors.email ? 'email-error' : undefined}
                     />
@@ -177,14 +178,14 @@ const Login = () => {
                 <div className="space-y-1.5">
                   <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em] ml-1">Kredensial Keamanan</label>
                   <div className="relative group">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={16} />
-                    <input
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors z-10" size={16} />
+                    <Input
                       type="password"
                       name="password"
                       value={password}
                       onChange={handleInputChange}
                       placeholder="••••••••"
-                      className={`w-full bg-slate-50 border ${errors.password ? 'border-red-400' : 'border-slate-100'} pl-11 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 ${errors.password ? 'focus:ring-red-500/20' : 'focus:ring-emerald-500/20'} text-slate-700 placeholder-slate-300 transition-all font-medium text-sm`}
+                      className={`w-full bg-slate-50 border ${errors.password ? 'border-red-400' : 'border-slate-100'} pl-11 pr-4 py-3 h-auto rounded-xl focus:outline-none focus:ring-2 ${errors.password ? 'focus:ring-red-500/20' : 'focus:ring-emerald-500/20'} text-slate-700 placeholder-slate-300 transition-all font-medium text-sm`}
                       aria-invalid={!!errors.password}
                       aria-describedby={errors.password ? 'password-error' : undefined}
                     />

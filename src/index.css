@@ -1,6 +1,31 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@layer base {
+  :root {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 201 84% 49%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 18%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 38 92% 50%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 160 84% 39%;
+    --radius: 0.75rem;
+  }
+}
+
 @theme {
   --color-primary: #10b981; /* Emerald / Agriculture */
   --color-primary-dark: #059669;
@@ -12,7 +37,7 @@
   --color-text-main: #e2e8f0;   /* Slate 200 for dark bg */
   --color-text-dim: #94a3b8;    /* Slate 400 */
   --color-border-light: rgba(30, 58, 138, 0.4); /* Navy border */
-  
+
   --font-outfit: "Outfit", sans-serif;
   --font-cyber: "Manrope", sans-serif;
 
@@ -25,7 +50,7 @@ body {
   font-family: var(--font-outfit);
   overflow-x: hidden;
   min-height: 100vh;
-  background-image: 
+  background-image:
     radial-gradient(at top left, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
     radial-gradient(at bottom right, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
 }
