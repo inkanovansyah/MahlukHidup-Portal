@@ -4,7 +4,8 @@ import {
   BarChart3, AlertTriangle, ShieldCheck, CheckCircle2,
   Zap, Droplet, Leaf, Layers, Coins,
   Info, Camera, Sparkles, TrendingUp, TrendingDown, ThermometerSun,
-  Bug, FlaskConical, Building2
+  Bug, FlaskConical, Building2, Wheat, AlertOctagon,
+  Clock, ArrowUpRight, ArrowDownRight, Eye, Activity, MapPin, Users
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +13,8 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import MapView from '../components/ui/MapView';
 import CompanyManagement from './CompanyManagement';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import UserManagement from './UserManagement';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart as RechartsBarChart, Bar, LineChart, Line } from 'recharts';
 
 const mockMarkers: any[] = [
   { 
@@ -47,16 +49,166 @@ const mockDrones = [
   { id: 'Drone-03', health: 100, battery: 96, status: 'Siaga', task: 'Standby di Hub 1' },
   { id: 'Drone-04', health: 85, battery: 15, status: 'Charging', task: 'Pengisian Daya' },
 ];
-
-const revenueData = [
-  { month: 'Jan', revenue: 120, yield: 4.0 }, { month: 'Feb', revenue: 150, yield: 4.8 },
-  { month: 'Mar', revenue: 180, yield: 5.2 }, { month: 'Apr', revenue: 140, yield: 4.5 },
-  { month: 'Mei', revenue: 200, yield: 6.1 }, { month: 'Jun', revenue: 240, yield: 6.8 },
-];
 const cropDistributionData = [
-  { name: 'Padi Premium', value: 45, color: '#10b981' }, { name: 'Jagung Hibrida', value: 30, color: '#f59e0b' },
-  { name: 'Tomat Ceri', value: 15, color: '#0ea5e9' }, { name: 'Cabai Rawit', value: 10, color: '#ef4444' },
+  { name: 'Padi Premium', value: 45, color: '#10b981' }, { name: 'Jagung Hibrida', value: 35, color: '#f59e0b' },
+  { name: 'Tomat Ceri', value: 20, color: '#0ea5e9' },
 ];
+
+// ====== ALL ANALYTICS DATA DERIVEd FROM mockMarkers ======
+
+// Compute sector data from mockMarkers
+const _rawSectors = mockMarkers.map((m) => ({
+  ...m,
+  health: parseInt(m.plantHealth),
+  ph: parseFloat(m.tanah.ph),
+  moisture: parseInt(m.tanah.moisture),
+  nitrogen: m.tanah.pupuk === 'Optimal' ? 95 : m.tanah.pupuk.includes('Kurang') ? 55 : m.tanah.pupuk.includes('Kritis') ? 30 : 70,
+  pestWereng: m.status === 'danger' ? 12 : m.status === 'warning' ? 5 : 0,
+  pestUlat: m.status === 'danger' ? 8 : m.status === 'warning' ? 3 : 1,
+  pestKutu: m.status === 'danger' ? 6 : m.status === 'warning' ? 4 : 0,
+  pestBelalang: m.status === 'danger' ? 4 : m.status === 'warning' ? 2 : 0,
+  waterUsage: m.status === 'danger' ? 180 : m.status === 'warning' ? 120 : 80,
+  waterRainfall: m.status === 'danger' ? 10 : m.status === 'warning' ? 30 : 50,
+  yieldCurrent: m.status === 'danger' ? 2.1 : m.status === 'warning' ? 5.2 : 8.5,
+  yieldTarget: m.status === 'danger' ? 8.0 : m.status === 'warning' ? 6.0 : 8.0,
+  revenue: parseInt(m.finansial.potensiKeuntungan.replace(/\D/g, '')) / 1000000,
+  cost: parseInt(m.finansial.potensiRugi.replace(/\D/g, '')) / 1000000,
+  alerts: m.status === 'danger' ? 15 : m.status === 'warning' ? 8 : 2,
+  resolved: m.status === 'danger' ? 8 : m.status === 'warning' ? 6 : 2,
+  critical: m.status === 'danger' ? 5 : m.status === 'warning' ? 1 : 0,
+  luasHa: parseFloat(m.luasLahan),
+}));
+
+// Aggregated KPIs from mockMarkers
+const totalRevenue = _rawSectors.reduce((sum, s) => sum + s.revenue, 0); // in millions
+const totalYield = _rawSectors.reduce((sum, s) => sum + s.yieldCurrent, 0);
+const totalArea = _rawSectors.reduce((sum, s) => sum + s.luasHa, 0);
+const avgHealth = Math.round(_rawSectors.reduce((sum, s) => sum + s.health, 0) / _rawSectors.length);
+const totalAlerts = _rawSectors.reduce((sum, s) => sum + s.alerts, 0);
+const totalResolved = _rawSectors.reduce((sum, s) => sum + s.resolved, 0);
+
+// Revenue trend (scaled from current sectors)
+const revenueData = [
+  { month: 'Jan', revenue: Math.round(totalRevenue * 0.55), yield: +(totalYield * 0.55).toFixed(1) },
+  { month: 'Feb', revenue: Math.round(totalRevenue * 0.62), yield: +(totalYield * 0.62).toFixed(1) },
+  { month: 'Mar', revenue: Math.round(totalRevenue * 0.70), yield: +(totalYield * 0.68).toFixed(1) },
+  { month: 'Apr', revenue: Math.round(totalRevenue * 0.58), yield: +(totalYield * 0.60).toFixed(1) },
+  { month: 'Mei', revenue: Math.round(totalRevenue * 0.78), yield: +(totalYield * 0.75).toFixed(1) },
+  { month: 'Jun', revenue: Math.round(totalRevenue * 0.92), yield: +(totalYield * 0.85).toFixed(1) },
+];
+
+// Soil quality trend — derived from current sector conditions
+const _avgPh = (_rawSectors.reduce((sum, s) => sum + s.ph, 0) / _rawSectors.length).toFixed(1);
+const _avgMoisture = Math.round(_rawSectors.reduce((sum, s) => sum + s.moisture, 0) / _rawSectors.length);
+const _avgNitrogen = Math.round(_rawSectors.reduce((sum, s) => sum + s.nitrogen, 0) / _rawSectors.length);
+const soilQualityData = [
+  { month: 'Jan', ph: +(parseFloat(_avgPh) - 0.3).toFixed(1), moisture: Math.max(_avgMoisture - 10, 20), nitrogen: Math.max(_avgNitrogen - 15, 20) },
+  { month: 'Feb', ph: +(parseFloat(_avgPh) - 0.2).toFixed(1), moisture: Math.max(_avgMoisture - 5, 25), nitrogen: Math.max(_avgNitrogen - 10, 25) },
+  { month: 'Mar', ph: +(parseFloat(_avgPh) - 0.4).toFixed(1), moisture: Math.max(_avgMoisture - 15, 15), nitrogen: Math.max(_avgNitrogen - 20, 15) },
+  { month: 'Apr', ph: +(parseFloat(_avgPh) - 0.5).toFixed(1), moisture: Math.max(_avgMoisture - 20, 10), nitrogen: Math.max(_avgNitrogen - 25, 10) },
+  { month: 'Mei', ph: +(parseFloat(_avgPh) - 0.1).toFixed(1), moisture: Math.max(_avgMoisture - 3, 30), nitrogen: Math.max(_avgNitrogen - 5, 35) },
+  { month: 'Jun', ph: _avgPh, moisture: _avgMoisture, nitrogen: _avgNitrogen },
+];
+
+// Pest detection — derived from current sector pest counts
+const totalWereng = _rawSectors.reduce((sum, s) => sum + s.pestWereng, 0);
+const totalUlat = _rawSectors.reduce((sum, s) => sum + s.pestUlat, 0);
+const totalKutu = _rawSectors.reduce((sum, s) => sum + s.pestKutu, 0);
+const totalBelalang = _rawSectors.reduce((sum, s) => sum + s.pestBelalang, 0);
+const pestDetectionData = [
+  { month: 'Jan', wereng: Math.max(Math.round(totalWereng * 0.15), 1), ulat: Math.max(Math.round(totalUlat * 0.12), 0), kutu: Math.max(Math.round(totalKutu * 0.1), 0), belalang: Math.max(Math.round(totalBelalang * 0.1), 0) },
+  { month: 'Feb', wereng: Math.max(Math.round(totalWereng * 0.25), 1), ulat: Math.max(Math.round(totalUlat * 0.2), 0), kutu: Math.max(Math.round(totalKutu * 0.2), 0), belalang: Math.max(Math.round(totalBelalang * 0.15), 0) },
+  { month: 'Mar', wereng: Math.max(Math.round(totalWereng * 0.5), 1), ulat: Math.max(Math.round(totalUlat * 0.45), 0), kutu: Math.max(Math.round(totalKutu * 0.4), 0), belalang: Math.max(Math.round(totalBelalang * 0.35), 0) },
+  { month: 'Apr', wereng: Math.max(Math.round(totalWereng * 0.35), 1), ulat: Math.max(Math.round(totalUlat * 0.3), 0), kutu: Math.max(Math.round(totalKutu * 0.35), 0), belalang: Math.max(Math.round(totalBelalang * 0.25), 0) },
+  { month: 'Mei', wereng: Math.max(Math.round(totalWereng * 0.2), 1), ulat: Math.max(Math.round(totalUlat * 0.15), 0), kutu: Math.max(Math.round(totalKutu * 0.15), 0), belalang: Math.max(Math.round(totalBelalang * 0.1), 0) },
+  { month: 'Jun', wereng: totalWereng, ulat: totalUlat, kutu: totalKutu, belalang: totalBelalang },
+];
+
+// Water usage — derived from sector water data
+const totalWaterUsage = _rawSectors.reduce((sum, s) => sum + s.waterUsage, 0);
+const totalWaterRain = _rawSectors.reduce((sum, s) => sum + s.waterRainfall, 0);
+const waterUsageData = [
+  { month: 'Jan', usage: Math.round(totalWaterUsage * 0.7), rainfall: Math.round(totalWaterRain * 0.8) },
+  { month: 'Feb', usage: Math.round(totalWaterUsage * 0.65), rainfall: Math.round(totalWaterRain * 0.9) },
+  { month: 'Mar', usage: Math.round(totalWaterUsage * 0.75), rainfall: Math.round(totalWaterRain * 0.6) },
+  { month: 'Apr', usage: Math.round(totalWaterUsage * 0.8), rainfall: Math.round(totalWaterRain * 0.4) },
+  { month: 'Mei', usage: Math.round(totalWaterUsage * 0.6), rainfall: Math.round(totalWaterRain * 1.0) },
+  { month: 'Jun', usage: totalWaterUsage, rainfall: totalWaterRain },
+];
+
+// Sector performance — directly from mockMarkers
+const sectorPerformanceData = _rawSectors.map((s) => ({
+  sector: s.title.replace('Sektor ', ''),
+  health: s.health,
+  yield: +s.yieldCurrent.toFixed(1),
+  profit: Math.round(s.revenue - s.cost),
+  status: s.status === 'danger' ? 'Kritis' : s.status === 'warning' ? 'Warning' : 'Optimal',
+}));
+
+// Monthly alerts — derived from current sector alert counts
+const totalAlertsCount = _rawSectors.reduce((sum, s) => sum + s.alerts, 0);
+const totalResolvedCount = _rawSectors.reduce((sum, s) => sum + s.resolved, 0);
+const monthlyAlertsData = [
+  { month: 'Jan', alerts: Math.max(Math.round(totalAlertsCount * 0.1), 1), resolved: Math.max(Math.round(totalResolvedCount * 0.08), 0) },
+  { month: 'Feb', alerts: Math.max(Math.round(totalAlertsCount * 0.2), 1), resolved: Math.max(Math.round(totalResolvedCount * 0.15), 0) },
+  { month: 'Mar', alerts: Math.max(Math.round(totalAlertsCount * 0.4), 2), resolved: Math.max(Math.round(totalResolvedCount * 0.3), 1) },
+  { month: 'Apr', alerts: Math.max(Math.round(totalAlertsCount * 0.3), 1), resolved: Math.max(Math.round(totalResolvedCount * 0.25), 1) },
+  { month: 'Mei', alerts: Math.max(Math.round(totalAlertsCount * 0.15), 1), resolved: Math.max(Math.round(totalResolvedCount * 0.12), 0) },
+  { month: 'Jun', alerts: totalAlertsCount, resolved: totalResolvedCount },
+];
+
+// Crop yield by type — derived from sectors
+const cropYieldByType = [
+  { crop: _rawSectors[1].cropType, yield: _rawSectors[1].yieldCurrent, target: _rawSectors[1].yieldTarget, area: _rawSectors[1].luasHa + ' Ha' },
+  { crop: _rawSectors[0].cropType, yield: _rawSectors[0].yieldCurrent, target: _rawSectors[0].yieldTarget, area: _rawSectors[0].luasHa + ' Ha' },
+  { crop: _rawSectors[2].cropType, yield: _rawSectors[2].yieldCurrent, target: _rawSectors[2].yieldTarget, area: _rawSectors[2].luasHa + ' Ha' },
+];
+
+// Data detail per lahan — derived from mockMarkers (geospatial monitoring data)
+const sectorDetailData = mockMarkers.map((m) => ({
+  id: m.id.split('-')[1].toUpperCase(),
+  name: m.title,
+  luas: m.luasLahan,
+  cropType: m.cropType,
+  health: parseInt(m.plantHealth),
+  position: m.position,
+  soil: {
+    ph: parseFloat(m.tanah.ph),
+    moisture: parseInt(m.tanah.moisture),
+    nitrogen: m.tanah.pupuk === 'Optimal' ? 95 : m.tanah.pupuk.includes('Kurang') ? 55 : m.tanah.pupuk.includes('Kritis') ? 30 : 70,
+    organic: m.tanah.pupuk === 'Optimal' ? 88 : m.tanah.pupuk.includes('Kurang') ? 62 : m.tanah.pupuk.includes('Kritis') ? 25 : 78,
+  },
+  pest: {
+    wereng: m.status === 'danger' ? 12 : m.status === 'warning' ? 5 : 0,
+    ulat: m.status === 'danger' ? 8 : m.status === 'warning' ? 3 : 1,
+    kutu: m.status === 'danger' ? 6 : m.status === 'warning' ? 4 : 0,
+    belalang: m.status === 'danger' ? 4 : m.status === 'warning' ? 2 : 0,
+  },
+  water: {
+    usage: m.status === 'danger' ? 180 : m.status === 'warning' ? 120 : 80,
+    rainfall: m.status === 'danger' ? 10 : m.status === 'warning' ? 30 : 50,
+    efficiency: m.status === 'danger' ? 35 : m.status === 'warning' ? 68 : 94,
+  },
+  yield: {
+    current: m.status === 'danger' ? 2.1 : m.status === 'warning' ? 5.2 : 8.5,
+    target: m.status === 'danger' ? 8.0 : m.status === 'warning' ? 6.0 : 8.0,
+    unit: 'Ton',
+  },
+  finance: {
+    revenue: parseInt(m.finansial.potensiKeuntungan.replace(/\D/g, '')) / 1000000,
+    cost: parseInt(m.finansial.potensiRugi.replace(/\D/g, '')) / 1000000,
+    profit: (parseInt(m.finansial.potensiKeuntungan.replace(/\D/g, '')) - parseInt(m.finansial.potensiRugi.replace(/\D/g, ''))) / 1000000,
+  },
+  alerts: {
+    total: m.status === 'danger' ? 15 : m.status === 'warning' ? 8 : 2,
+    resolved: m.status === 'danger' ? 8 : m.status === 'warning' ? 6 : 2,
+    critical: m.status === 'danger' ? 5 : m.status === 'warning' ? 1 : 0,
+  },
+  status: m.status === 'danger' ? 'Kritis' : m.status === 'warning' ? 'Warning' : 'Optimal',
+  trend: m.status === 'danger' ? 'down' : m.status === 'warning' ? 'down' : 'up',
+  description: m.description,
+  aiSaran: m.aiSaran,
+}));
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -77,7 +229,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const Dashboard = () => {
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('monitoring');
   const [activeSector, setActiveSector] = useState(mockMarkers[0]);
@@ -118,6 +270,7 @@ const Dashboard = () => {
             { id: 'analytics', label: 'Analitik Keseluruhan', icon: BarChart3, action: () => setActiveTab('analytics') },
             { id: 'drones', label: 'Analisa Drone', icon: Navigation, action: () => setActiveTab('drones') },
             { id: 'companies', label: 'Manajemen Perusahaan', icon: Building2, action: () => setActiveTab('companies') },
+            { id: 'users', label: 'Manajemen User', icon: Users, action: () => setActiveTab('users') },
           ].map((item) => (
             <button
               key={item.id}
@@ -131,15 +284,55 @@ const Dashboard = () => {
         </nav>
 
         <div className="mt-auto px-3 pt-4 border-t border-blue-900/40">
-          <Button variant="ghost" fullWidth onClick={handleLogout} className="rounded-xl py-3 text-red-400 hover:bg-red-900/20">
-            <Power size={18} />
-            <span className="hidden lg:block uppercase text-[9px] font-black tracking-widest leading-none">Logout</span>
-          </Button>
+          <div className="p-3 bg-blue-900/20 rounded-xl border border-blue-800/30 text-center">
+            <p className="text-[8px] text-blue-400/50 font-bold uppercase tracking-widest">v2.6.0-PRO</p>
+          </div>
         </div>
       </aside>
 
       {/* CONTENT AREA */}
-      <main className="relative flex-1 h-full overflow-hidden bg-[#0b1730]">
+      <main className="relative flex-1 h-full overflow-hidden bg-[#0b1730] flex flex-col">
+
+        {/* TOP NAVBAR */}
+        <header className="h-14 bg-[#0d1f47] border-b border-blue-900/40 flex items-center justify-between px-4 lg:px-6 flex-shrink-0 z-40">
+          {/* Left: Page Title */}
+          <div>
+            <h2 className="text-sm font-black text-white uppercase font-cyber italic tracking-tight">
+              {activeTab === 'monitoring' && 'MONITOR GEOSPASIAL'}
+              {activeTab === 'analytics' && 'ANALITIK KESELURUHAN'}
+              {activeTab === 'drones' && 'ANALISA ARMADA DRONE'}
+              {activeTab === 'companies' && 'MANAJEMEN PERUSAHAAN'}
+              {activeTab === 'users' && 'MANAJEMEN USER'}
+            </h2>
+          </div>
+
+          {/* Right: User Info + Logout */}
+          <div className="flex items-center gap-3">
+            {user && (
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-2 pr-3">
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold text-white truncate leading-tight">{user.name}</p>
+                    <p className="text-[8px] text-emerald-400 font-black uppercase tracking-wider">{user.role}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-sky-500 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg shadow-emerald-500/20 flex-shrink-0">
+                    {user.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg transition-all text-red-400 hover:text-red-300 group"
+                  title="Logout"
+                >
+                  <Power size={14} className="group-hover:scale-110 transition-transform" />
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Content Scroll Area */}
+        <div className="flex-1 overflow-hidden">
         
         {/* TAB 1: MONITORING GEOSPASIAL */}
         {activeTab === 'monitoring' && (
@@ -296,62 +489,273 @@ const Dashboard = () => {
         {/* TAB 2: ANALITIK KESELURUHAN */}
         {activeTab === 'analytics' && (
           <div className="p-6 lg:p-10 h-full overflow-y-auto custom-scrollbar bg-[#0b1730]">
-             {/* Component kept exactly identical */}
              <header className="mb-10">
-               <h2 className="text-3xl font-black text-white tracking-tighter uppercase font-cyber italic">ANALITIK KESELURUHAN</h2>
-               <p className="text-xs font-bold text-blue-400/70 uppercase tracking-widest mt-1">Laporan Komprehensif Ekosistem Mahluk Hidup</p>
+               <div className="flex items-center gap-4 mb-2">
+                 <h2 className="text-3xl font-black text-white tracking-tighter uppercase font-cyber italic">ANALITIK KESELURUHAN</h2>
+                 <span className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-sky-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-emerald-500/30 flex items-center gap-1.5">
+                   <Activity size={12} />
+                   LIVE DATA
+                 </span>
+               </div>
+               <p className="text-xs font-bold text-blue-400/70 uppercase tracking-widest mt-1">Laporan Komprehensif Ekosistem Mahluk Hidup • Periode Juni 2026</p>
              </header>
 
-             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+             {/* ROW 1: KPI CARDS - 6 Metrics (computed from mockMarkers) */}
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
                 <Card className="hover:border-emerald-500/30 transition-all group" padding={true}>
                    <div className="flex justify-between items-start">
-                     <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-lg group-hover:scale-110 transition-transform"><Coins size={20} /></div>
-                     <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">↑ 24%</span>
+                     <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-lg group-hover:scale-110 transition-transform"><Coins size={18} /></div>
+                     <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded-full flex items-center gap-0.5"><ArrowUpRight size={10} />24%</span>
                    </div>
-                   <div className="mt-4">
-                     <p className="text-[9px] font-black text-blue-400/70 uppercase tracking-widest mb-1">Total Pendapatan</p>
-                     <p className="text-2xl font-black tracking-tighter text-white italic">Rp 4.2<span className="text-sm ml-1 text-blue-400/70 uppercase">Milyar</span></p>
+                   <div className="mt-3">
+                     <p className="text-[8px] font-black text-blue-400/70 uppercase tracking-widest mb-0.5">Total Pendapatan</p>
+                     <p className="text-lg font-black tracking-tighter text-white italic">Rp {totalRevenue.toFixed(0)}<span className="text-xs ml-0.5 text-blue-400/70 uppercase">Jt</span></p>
                    </div>
                 </Card>
                 <Card className="hover:border-sky-500/30 transition-all group" padding={true}>
                    <div className="flex justify-between items-start">
-                     <div className="p-3 bg-sky-500/20 text-sky-400 rounded-lg group-hover:scale-110 transition-transform"><Leaf size={20} /></div>
-                     <span className="text-[10px] font-black text-sky-400 bg-sky-500/20 px-2 py-0.5 rounded-full">↑ 18%</span>
+                     <div className="p-2.5 bg-sky-500/20 text-sky-400 rounded-lg group-hover:scale-110 transition-transform"><Wheat size={18} /></div>
+                     <span className="text-[9px] font-black text-sky-400 bg-sky-500/20 px-1.5 py-0.5 rounded-full flex items-center gap-0.5"><ArrowUpRight size={10} />18%</span>
                    </div>
-                   <div className="mt-4">
-                     <p className="text-[9px] font-black text-blue-400/70 uppercase tracking-widest mb-1">Total Panen (Tonase)</p>
-                     <p className="text-2xl font-black tracking-tighter text-white italic">86.5<span className="text-sm ml-1 text-blue-400/70 uppercase">Ton</span></p>
+                   <div className="mt-3">
+                     <p className="text-[8px] font-black text-blue-400/70 uppercase tracking-widest mb-0.5">Total Panen</p>
+                     <p className="text-lg font-black tracking-tighter text-white italic">{totalYield.toFixed(1)}<span className="text-xs ml-0.5 text-blue-400/70 uppercase">Ton</span></p>
                    </div>
                 </Card>
                 <Card className="hover:border-amber-500/30 transition-all group" padding={true}>
                    <div className="flex justify-between items-start">
-                     <div className="p-3 bg-amber-500/20 text-amber-400 rounded-lg group-hover:scale-110 transition-transform"><Layers size={20} /></div>
+                     <div className="p-2.5 bg-amber-500/20 text-amber-400 rounded-lg group-hover:scale-110 transition-transform"><Layers size={18} /></div>
+                     <span className="text-[9px] font-black text-blue-400 bg-blue-500/20 px-1.5 py-0.5 rounded-full">{totalArea.toFixed(1)} Ha</span>
                    </div>
-                   <div className="mt-4">
-                     <p className="text-[9px] font-black text-blue-400/70 uppercase tracking-widest mb-1">Lahan Produktif</p>
-                     <p className="text-2xl font-black tracking-tighter text-white italic">4.2<span className="text-sm ml-1 text-blue-400/70 uppercase">Hektar</span></p>
+                   <div className="mt-3">
+                     <p className="text-[8px] font-black text-blue-400/70 uppercase tracking-widest mb-0.5">Lahan Produktif</p>
+                     <p className="text-lg font-black tracking-tighter text-white italic">{totalArea.toFixed(0)}<span className="text-xs ml-0.5 text-blue-400/70 uppercase">Ha</span></p>
                    </div>
                 </Card>
-                <Card className="hover:border-emerald-500/30 transition-all group bg-emerald-500 text-white border-none shadow-xl shadow-emerald-500/20" padding={true}>
+                <Card className="hover:border-emerald-500/30 transition-all group bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-none shadow-xl shadow-emerald-500/20" padding={true}>
                    <div className="flex justify-between items-start">
-                     <div className="p-3 bg-white/20 text-white rounded-lg group-hover:scale-110 transition-transform"><ShieldCheck size={20} /></div>
+                     <div className="p-2.5 bg-white/20 text-white rounded-lg group-hover:scale-110 transition-transform"><ShieldCheck size={18} /></div>
+                     <span className="text-[9px] font-black text-emerald-100 bg-white/20 px-1.5 py-0.5 rounded-full">+2.1%</span>
                    </div>
-                   <div className="mt-4">
-                     <p className="text-[9px] font-black text-emerald-100 uppercase tracking-widest mb-1">Kesehatan Tanaman</p>
-                     <p className="text-2xl font-black tracking-tighter italic">92.4<span className="text-sm ml-1 text-emerald-200 uppercase">%</span></p>
+                   <div className="mt-3">
+                     <p className="text-[8px] font-black text-emerald-100 uppercase tracking-widest mb-0.5">Kesehatan Tanaman</p>
+                     <p className="text-lg font-black tracking-tighter italic">{avgHealth}<span className="text-xs ml-0.5 text-emerald-200 uppercase">%</span></p>
+                   </div>
+                </Card>
+                <Card className="hover:border-rose-500/30 transition-all group" padding={true}>
+                   <div className="flex justify-between items-start">
+                     <div className="p-2.5 bg-rose-500/20 text-rose-400 rounded-lg group-hover:scale-110 transition-transform"><AlertOctagon size={18} /></div>
+                     <span className="text-[9px] font-black text-rose-400 bg-rose-500/20 px-1.5 py-0.5 rounded-full flex items-center gap-0.5"><ArrowDownRight size={10} />67%</span>
+                   </div>
+                   <div className="mt-3">
+                     <p className="text-[8px] font-black text-blue-400/70 uppercase tracking-widest mb-0.5">Total Alert</p>
+                     <p className="text-lg font-black tracking-tighter text-white italic">{totalAlerts}<span className="text-xs ml-0.5 text-blue-400/70 uppercase">Events</span></p>
+                   </div>
+                </Card>
+                <Card className="hover:border-blue-500/30 transition-all group" padding={true}>
+                   <div className="flex justify-between items-start">
+                     <div className="p-2.5 bg-blue-500/20 text-blue-400 rounded-lg group-hover:scale-110 transition-transform"><Eye size={18} /></div>
+                     <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded-full">{Math.round((totalResolved / totalAlerts) * 100)}%</span>
+                   </div>
+                   <div className="mt-3">
+                     <p className="text-[8px] font-black text-blue-400/70 uppercase tracking-widest mb-0.5">Resolusi Rate</p>
+                     <p className="text-lg font-black tracking-tighter text-white italic">{totalResolved}/{totalAlerts}<span className="text-xs ml-0.5 text-blue-400/70 uppercase">Resolved</span></p>
                    </div>
                 </Card>
              </div>
 
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+             {/* ROW 1.5: DETAIL PER LAHAN */}
+             <div className="mb-8">
+               <div className="flex items-center gap-3 mb-4">
+                 <MapPin size={16} className="text-emerald-400" />
+                 <h3 className="font-black text-sm tracking-widest uppercase text-white italic">Detail per Lahan</h3>
+                 <span className="text-[9px] font-bold text-blue-400/60 uppercase tracking-wider">Breakdown 4 Sektor • 44.0 Ha Total</span>
+               </div>
+
+               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                 {sectorDetailData.map((sector) => (
+                   <Card key={sector.id} className="hover:border-emerald-500/30 transition-all" padding={false}>
+                     {/* Header */}
+                     <div className={`p-5 border-b ${
+                       sector.status === 'Optimal' ? 'border-emerald-500/20 bg-emerald-500/5' :
+                       sector.status === 'Baik' ? 'border-sky-500/20 bg-sky-500/5' :
+                       sector.status === 'Warning' ? 'border-amber-500/20 bg-amber-500/5' :
+                       'border-red-500/20 bg-red-500/5'
+                     }`}>
+                       <div className="flex items-start justify-between gap-4">
+                         <div className="flex items-start gap-3 flex-1">
+                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg ${
+                             sector.status === 'Optimal' ? 'bg-emerald-500/20 text-emerald-400' :
+                             sector.status === 'Baik' ? 'bg-sky-500/20 text-sky-400' :
+                             sector.status === 'Warning' ? 'bg-amber-500/20 text-amber-400' :
+                             'bg-red-500/20 text-red-400'
+                           }`}>
+                             {sector.id}
+                           </div>
+                           <div className="flex-1">
+                             <h4 className="text-sm font-black text-white uppercase font-cyber italic">{sector.name}</h4>
+                             <div className="flex items-center gap-3 mt-1">
+                               <span className="text-[9px] text-blue-400/60 font-bold">{sector.luas}</span>
+                               <span className="text-[9px] text-blue-400/60 font-bold">•</span>
+                               <span className="text-[9px] text-blue-400/60 font-bold">{sector.cropType}</span>
+                             </div>
+                           </div>
+                         </div>
+                         <div className="text-right flex flex-col items-end gap-1">
+                           <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                             sector.status === 'Optimal' ? 'bg-emerald-500/20 text-emerald-400' :
+                             sector.status === 'Baik' ? 'bg-sky-500/20 text-sky-400' :
+                             sector.status === 'Warning' ? 'bg-amber-500/20 text-amber-400' :
+                             'bg-red-500/20 text-red-400'
+                           }`}>{sector.status}</span>
+                           <div className="flex items-center gap-1">
+                             {sector.trend === 'up' ? <ArrowUpRight size={12} className="text-emerald-400" /> : <ArrowDownRight size={12} className="text-red-400" />}
+                             <span className={`text-[9px] font-black ${sector.trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
+                               {sector.health}%
+                             </span>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+
+                     {/* Content Grid */}
+                     <div className="p-5 grid grid-cols-2 gap-4">
+                       {/* Tanah */}
+                       <div className="p-3 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                         <div className="flex items-center gap-1.5 mb-2">
+                           <FlaskConical size={12} className="text-amber-400" />
+                           <span className="text-[8px] font-black text-blue-400/60 uppercase tracking-wider">Tanah</span>
+                         </div>
+                         <div className="space-y-1.5">
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">pH</span>
+                             <span className={`font-black ${sector.soil.ph >= 6 ? 'text-emerald-400' : sector.soil.ph >= 5.5 ? 'text-amber-400' : 'text-red-400'}`}>{sector.soil.ph}</span>
+                           </div>
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Kelembapan</span>
+                             <span className={`font-black ${sector.soil.moisture >= 60 ? 'text-emerald-400' : sector.soil.moisture >= 40 ? 'text-amber-400' : 'text-red-400'}`}>{sector.soil.moisture}%</span>
+                           </div>
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Nitrogen</span>
+                             <span className={`font-black ${sector.soil.nitrogen >= 80 ? 'text-emerald-400' : sector.soil.nitrogen >= 50 ? 'text-amber-400' : 'text-red-400'}`}>{sector.soil.nitrogen}%</span>
+                           </div>
+                         </div>
+                       </div>
+
+                       {/* Hama */}
+                       <div className="p-3 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                         <div className="flex items-center gap-1.5 mb-2">
+                           <Bug size={12} className="text-red-400" />
+                           <span className="text-[8px] font-black text-blue-400/60 uppercase tracking-wider">Hama</span>
+                         </div>
+                         <div className="space-y-1.5">
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Wereng</span>
+                             <span className={`font-black ${sector.pest.wereng === 0 ? 'text-emerald-400' : sector.pest.wereng > 5 ? 'text-red-400' : 'text-amber-400'}`}>{sector.pest.wereng}</span>
+                           </div>
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Ulat</span>
+                             <span className={`font-black ${sector.pest.ulat === 0 ? 'text-emerald-400' : sector.pest.ulat > 5 ? 'text-red-400' : 'text-amber-400'}`}>{sector.pest.ulat}</span>
+                           </div>
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Kutu</span>
+                             <span className={`font-black ${sector.pest.kutu === 0 ? 'text-emerald-400' : sector.pest.kutu > 5 ? 'text-red-400' : 'text-amber-400'}`}>{sector.pest.kutu}</span>
+                           </div>
+                         </div>
+                       </div>
+
+                       {/* Air */}
+                       <div className="p-3 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                         <div className="flex items-center gap-1.5 mb-2">
+                           <Droplet size={12} className="text-cyan-400" />
+                           <span className="text-[8px] font-black text-blue-400/60 uppercase tracking-wider">Air</span>
+                         </div>
+                         <div className="space-y-1.5">
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Pemakaian</span>
+                             <span className="font-black text-white">{sector.water.usage} m³</span>
+                           </div>
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Hujan</span>
+                             <span className="font-black text-indigo-400">{sector.water.rainfall} mm</span>
+                           </div>
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Efisiensi</span>
+                             <span className={`font-black ${sector.water.efficiency >= 80 ? 'text-emerald-400' : sector.water.efficiency >= 60 ? 'text-amber-400' : 'text-red-400'}`}>{sector.water.efficiency}%</span>
+                           </div>
+                         </div>
+                       </div>
+
+                       {/* Keuangan */}
+                       <div className="p-3 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                         <div className="flex items-center gap-1.5 mb-2">
+                           <Coins size={12} className="text-emerald-400" />
+                           <span className="text-[8px] font-black text-blue-400/60 uppercase tracking-wider">Keuangan</span>
+                         </div>
+                         <div className="space-y-1.5">
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Pendapatan</span>
+                             <span className="font-black text-emerald-400">Rp {sector.finance.revenue}jt</span>
+                           </div>
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Biaya</span>
+                             <span className="font-black text-amber-400">Rp {sector.finance.cost}jt</span>
+                           </div>
+                           <div className="flex justify-between text-[9px]">
+                             <span className="text-slate-400 font-bold">Profit</span>
+                             <span className={`font-black ${sector.finance.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>Rp {sector.finance.profit}jt</span>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+
+                     {/* Footer: Yield + Alerts */}
+                     <div className={`px-5 py-3 border-t flex items-center justify-between gap-4 ${
+                       sector.status === 'Optimal' ? 'border-emerald-500/20' :
+                       sector.status === 'Baik' ? 'border-sky-500/20' :
+                       sector.status === 'Warning' ? 'border-amber-500/20' :
+                       'border-red-500/20'
+                     }`}>
+                       <div className="flex items-center gap-3 flex-1">
+                         <div className="flex-1">
+                           <div className="flex items-center justify-between text-[8px] mb-1">
+                             <span className="text-blue-400/60 font-black uppercase">Hasil Panen</span>
+                             <span className="text-white font-black">{sector.yield.current}/{sector.yield.target} {sector.yield.unit}</span>
+                           </div>
+                           <div className="h-1.5 bg-blue-900/40 rounded-full overflow-hidden">
+                             <div className={`h-full rounded-full ${sector.yield.current >= sector.yield.target ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${Math.min((sector.yield.current / sector.yield.target) * 100, 100)}%` }} />
+                           </div>
+                         </div>
+                       </div>
+                       <div className="flex items-center gap-3 text-[9px]">
+                         <span className="flex items-center gap-1 font-bold text-blue-400/60">
+                           <AlertTriangle size={10} />
+                           {sector.alerts.total} alert{sector.alerts.total > 1 ? 's' : ''}
+                         </span>
+                         <span className={`font-black ${sector.alerts.critical > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                           {sector.alerts.resolved}/{sector.alerts.total} resolved
+                         </span>
+                       </div>
+                     </div>
+                   </Card>
+                 ))}
+               </div>
+             </div>
+
+             {/* ROW 2: Revenue Trend + Crop Distribution */}
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                <Card className="lg:col-span-2 shadow-xl" padding={true}>
-                 <div className="mb-6 flex justify-between items-center">
+                 <div className="mb-4 flex justify-between items-center">
                    <div>
-                     <h3 className="font-black text-sm tracking-widest uppercase text-white italic underline decoration-emerald-500/30">Tren Pendapatan & Panen</h3>
-                     <p className="text-[10px] text-blue-400/70 mt-1 uppercase font-bold">Data 6 Bulan Terakhir</p>
+                     <h3 className="font-black text-xs tracking-widest uppercase text-white italic underline decoration-emerald-500/30">Tren Pendapatan & Panen</h3>
+                     <p className="text-[9px] text-blue-400/70 mt-1 uppercase font-bold">Data 6 Bulan Terakhir</p>
+                   </div>
+                   <div className="flex items-center gap-4 text-[9px] font-bold">
+                     <span className="flex items-center gap-1 text-emerald-400"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Pendapatan (Juta)</span>
+                     <span className="flex items-center gap-1 text-sky-400"><span className="w-2 h-2 rounded-full bg-sky-500" /> Panen (Ton)</span>
                    </div>
                  </div>
-                 <div className="h-[300px] w-full">
+                 <div className="h-[280px] w-full">
                    <ResponsiveContainer width="100%" height="100%">
                      <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                        <defs>
@@ -364,7 +768,7 @@ const Dashboard = () => {
                        </defs>
                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} dy={10} />
                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} width={60} />
-                       <CartesianGrid vertical={false} stroke="#e2e8f0" strokeDasharray="3 3" />
+                       <CartesianGrid vertical={false} stroke="#1e3a5f" strokeDasharray="3 3" />
                        <RechartsTooltip content={<CustomTooltip />} />
                        <Area type="monotone" dataKey="revenue" name="Pendapatan (Juta)" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
                        <Area type="monotone" dataKey="yield" name="Panen (Ton)" stroke="#0ea5e9" strokeWidth={3} fillOpacity={1} fill="url(#colorYield)" />
@@ -374,21 +778,246 @@ const Dashboard = () => {
                </Card>
                <Card className="shadow-xl" padding={true}>
                  <div className="mb-2">
-                   <h3 className="font-black text-sm tracking-widest uppercase text-white italic underline decoration-sky-500/30">Distribusi Tanaman</h3>
-                   <p className="text-[10px] text-blue-400/70 mt-1 uppercase font-bold">Komposisi Ekosistem Saat Ini</p>
+                   <h3 className="font-black text-xs tracking-widest uppercase text-white italic underline decoration-sky-500/30">Distribusi Tanaman</h3>
+                   <p className="text-[9px] text-blue-400/70 mt-1 uppercase font-bold">Komposisi Ekosistem</p>
                  </div>
-                 <div className="h-[240px] w-full">
+                 <div className="h-[200px] w-full">
                    <ResponsiveContainer width="100%" height="100%">
                      <PieChart>
-                       <Pie data={cropDistributionData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
+                       <Pie data={cropDistributionData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={5} dataKey="value" stroke="none">
                          {cropDistributionData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                        </Pie>
                        <RechartsTooltip content={<CustomTooltip />} />
                      </PieChart>
                    </ResponsiveContainer>
                  </div>
+                 <div className="space-y-2 mt-2">
+                   {cropDistributionData.map((item, i) => (
+                     <div key={i} className="flex items-center justify-between text-[9px]">
+                       <span className="flex items-center gap-1.5 font-bold text-slate-300">
+                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                         {item.name}
+                       </span>
+                       <span className="font-black text-white">{item.value}%</span>
+                     </div>
+                   ))}
+                 </div>
                </Card>
              </div>
+
+             {/* ROW 3: Soil Quality + Pest Detection */}
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+               <Card className="shadow-xl" padding={true}>
+                 <div className="mb-4 flex justify-between items-center">
+                   <div>
+                     <h3 className="font-black text-xs tracking-widest uppercase text-white italic underline decoration-amber-500/30">Kualitas Tanah</h3>
+                     <p className="text-[9px] text-blue-400/70 mt-1 uppercase font-bold">Tren pH, Kelembapan & Nitrogen</p>
+                   </div>
+                   <FlaskConical size={18} className="text-amber-400" />
+                 </div>
+                 <div className="h-[250px] w-full">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <LineChart data={soilQualityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                       <CartesianGrid vertical={false} stroke="#1e3a5f" strokeDasharray="3 3" />
+                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} dy={10} />
+                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} width={50} />
+                       <RechartsTooltip content={<CustomTooltip />} />
+                       <Line type="monotone" dataKey="ph" name="pH Tanah" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} />
+                       <Line type="monotone" dataKey="moisture" name="Kelembapan (%)" stroke="#0ea5e9" strokeWidth={2.5} dot={{ r: 3 }} />
+                       <Line type="monotone" dataKey="nitrogen" name="Nitrogen (%)" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} />
+                     </LineChart>
+                   </ResponsiveContainer>
+                 </div>
+               </Card>
+
+               <Card className="shadow-xl" padding={true}>
+                 <div className="mb-4 flex justify-between items-center">
+                   <div>
+                     <h3 className="font-black text-xs tracking-widest uppercase text-white italic underline decoration-red-500/30">Deteksi Hama</h3>
+                     <p className="text-[9px] text-blue-400/70 mt-1 uppercase font-bold">Insiden per Bulan</p>
+                   </div>
+                   <Bug size={18} className="text-red-400" />
+                 </div>
+                 <div className="h-[250px] w-full">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <RechartsBarChart data={pestDetectionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                       <CartesianGrid vertical={false} stroke="#1e3a5f" strokeDasharray="3 3" />
+                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} dy={10} />
+                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} width={50} />
+                       <RechartsTooltip content={<CustomTooltip />} />
+                       <Bar dataKey="wereng" name="Wereng" stackId="a" fill="#ef4444" radius={[0, 0, 0, 0]} />
+                       <Bar dataKey="ulat" name="Ulat" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} />
+                       <Bar dataKey="kutu" name="Kutu Daun" stackId="a" fill="#0ea5e9" radius={[0, 0, 0, 0]} />
+                       <Bar dataKey="belalang" name="Belalang" stackId="a" fill="#10b981" radius={[4, 4, 0, 0]} />
+                     </RechartsBarChart>
+                   </ResponsiveContainer>
+                 </div>
+               </Card>
+             </div>
+
+             {/* ROW 4: Water Usage + Sector Performance */}
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+               <Card className="shadow-xl" padding={true}>
+                 <div className="mb-4 flex justify-between items-center">
+                   <div>
+                     <h3 className="font-black text-xs tracking-widest uppercase text-white italic underline decoration-cyan-500/30">Penggunaan Air Irigasi</h3>
+                     <p className="text-[9px] text-blue-400/70 mt-1 uppercase font-bold">Volume vs Curah Hujan (m³)</p>
+                   </div>
+                   <Droplet size={18} className="text-cyan-400" />
+                 </div>
+                 <div className="h-[250px] w-full">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <RechartsBarChart data={waterUsageData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                       <CartesianGrid vertical={false} stroke="#1e3a5f" strokeDasharray="3 3" />
+                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} dy={10} />
+                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} width={50} />
+                       <RechartsTooltip content={<CustomTooltip />} />
+                       <Bar dataKey="usage" name="Penggunaan Air" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                       <Bar dataKey="rainfall" name="Curah Hujan" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                     </RechartsBarChart>
+                   </ResponsiveContainer>
+                 </div>
+               </Card>
+
+               {/* SECTOR PERFORMANCE TABLE */}
+               <Card className="shadow-xl" padding={true}>
+                 <div className="mb-4">
+                   <h3 className="font-black text-xs tracking-widest uppercase text-white italic underline decoration-emerald-500/30">Performa per Sektor</h3>
+                   <p className="text-[9px] text-blue-400/70 mt-1 uppercase font-bold">Rating Kesehatan & Produktivitas</p>
+                 </div>
+                 <div className="overflow-x-auto">
+                   <table className="w-full text-[10px]">
+                     <thead>
+                       <tr className="border-b border-blue-800/30 text-blue-400/70 uppercase tracking-wider">
+                         <th className="text-left py-2 font-black">Sektor</th>
+                         <th className="text-center py-2 font-black">Kesehatan</th>
+                         <th className="text-center py-2 font-black">Yield (Ton)</th>
+                         <th className="text-center py-2 font-black">Profit (Juta)</th>
+                         <th className="text-center py-2 font-black">Status</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {sectorPerformanceData.map((sector, i) => (
+                         <tr key={i} className="border-b border-blue-900/20 hover:bg-blue-900/10 transition-colors">
+                           <td className="py-2.5 font-bold text-white">{sector.sector}</td>
+                           <td className="text-center py-2.5">
+                             <div className="flex items-center justify-center gap-1.5">
+                               <div className="w-12 h-1.5 bg-blue-900/40 rounded-full overflow-hidden">
+                                 <div className={`h-full rounded-full ${sector.health > 80 ? 'bg-emerald-500' : sector.health > 60 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${sector.health}%` }} />
+                               </div>
+                               <span className={`font-black ${sector.health > 80 ? 'text-emerald-400' : sector.health > 60 ? 'text-amber-400' : 'text-red-400'}`}>{sector.health}%</span>
+                             </div>
+                           </td>
+                           <td className="text-center py-2.5 font-bold text-white">{sector.yield}</td>
+                           <td className="text-center py-2.5 font-bold text-emerald-400">{sector.profit}</td>
+                           <td className="text-center py-2.5">
+                             <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                               sector.status === 'Optimal' ? 'bg-emerald-500/20 text-emerald-400' :
+                               sector.status === 'Baik' ? 'bg-sky-500/20 text-sky-400' :
+                               sector.status === 'Warning' ? 'bg-amber-500/20 text-amber-400' :
+                               'bg-red-500/20 text-red-400'
+                             }`}>{sector.status}</span>
+                           </td>
+                         </tr>
+                       ))}
+                     </tbody>
+                   </table>
+                 </div>
+               </Card>
+             </div>
+
+             {/* ROW 5: Alerts + Crop Yield vs Target */}
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+               <Card className="shadow-xl" padding={true}>
+                 <div className="mb-4 flex justify-between items-center">
+                   <div>
+                     <h3 className="font-black text-xs tracking-widest uppercase text-white italic underline decoration-orange-500/30">Alert Bulanan</h3>
+                     <p className="text-[9px] text-blue-400/70 mt-1 uppercase font-bold">Terdeteksi vs Terselesaikan</p>
+                   </div>
+                   <Clock size={18} className="text-orange-400" />
+                 </div>
+                 <div className="h-[250px] w-full">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <RechartsBarChart data={monthlyAlertsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                       <CartesianGrid vertical={false} stroke="#1e3a5f" strokeDasharray="3 3" />
+                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} dy={10} />
+                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} width={50} />
+                       <RechartsTooltip content={<CustomTooltip />} />
+                       <Bar dataKey="alerts" name="Alert Terdeteksi" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                       <Bar dataKey="resolved" name="Terselesaikan" fill="#10b981" radius={[4, 4, 0, 0]} />
+                     </RechartsBarChart>
+                   </ResponsiveContainer>
+                 </div>
+               </Card>
+
+               {/* CROP YIELD VS TARGET */}
+               <Card className="shadow-xl" padding={true}>
+                 <div className="mb-4">
+                   <h3 className="font-black text-xs tracking-widest uppercase text-white italic underline decoration-green-500/30">Hasil Panen vs Target</h3>
+                   <p className="text-[9px] text-blue-400/70 mt-1 uppercase font-bold">Pencapaian per Komoditas</p>
+                 </div>
+                 <div className="space-y-4">
+                   {cropYieldByType.map((item, i) => {
+                     const achievement = Math.round((item.yield / item.target) * 100);
+                     const isAboveTarget = achievement >= 100;
+                     return (
+                       <div key={i} className="p-3 bg-blue-900/20 rounded-xl border border-blue-800/30">
+                         <div className="flex items-center justify-between mb-2">
+                           <div className="flex items-center gap-2">
+                             <Wheat size={14} className="text-emerald-400" />
+                             <span className="text-[10px] font-bold text-white">{item.crop}</span>
+                           </div>
+                           <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${isAboveTarget ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                             {achievement}%
+                           </span>
+                         </div>
+                         <div className="flex items-center gap-3">
+                           <div className="flex-1 h-2 bg-blue-900/40 rounded-full overflow-hidden">
+                             <div className={`h-full rounded-full ${isAboveTarget ? 'bg-emerald-500' : 'bg-red-500'}`} style={{ width: `${Math.min(achievement, 100)}%` }} />
+                           </div>
+                           <span className="text-[9px] font-bold text-slate-400 w-16 text-right">{item.yield}/{item.target} Ton</span>
+                         </div>
+                         <p className="text-[8px] text-blue-400/60 mt-1 font-bold">Area: {item.area}</p>
+                       </div>
+                     );
+                   })}
+                 </div>
+               </Card>
+             </div>
+
+             {/* ROW 6: AI Insights Summary */}
+             <Card className="shadow-xl mb-8 bg-gradient-to-br from-blue-900/40 to-slate-900/40 border border-blue-700/30" padding={true}>
+               <div className="flex items-start gap-4 mb-4">
+                 <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-lg"><Sparkles size={24} className="animate-pulse" /></div>
+                 <div>
+                   <h3 className="font-black text-sm tracking-widest uppercase text-white italic">Insights AI Agronom</h3>
+                   <p className="text-[9px] text-blue-400/70 mt-1 uppercase font-bold">Rekomendasi Otomatis Berdasarkan Data Real-time</p>
+                 </div>
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                   <div className="flex items-center gap-2 mb-2">
+                     <CheckCircle2 size={14} className="text-emerald-400" />
+                     <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">Optimal</span>
+                   </div>
+                   <p className="text-xs font-bold text-slate-300 leading-relaxed">Sektor A (Ciwidey) menunjukkan performa terbaik. Pertahankan jadwal irigasi dan pemupukan saat ini untuk hasil maksimal.</p>
+                 </div>
+                 <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                   <div className="flex items-center gap-2 mb-2">
+                     <AlertTriangle size={14} className="text-amber-400" />
+                     <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">Perhatian</span>
+                   </div>
+                   <p className="text-xs font-bold text-slate-300 leading-relaxed">Sektor B (Lembang) butuh penambahan nitrogen 15%. Jadwalkan pemupukan ulang dalam 3 hari ke depan untuk mencegah penurunan hasil.</p>
+                 </div>
+                 <div className="p-4 bg-red-500/10 rounded-xl border border-red-500/20">
+                   <div className="flex items-center gap-2 mb-2">
+                     <AlertOctagon size={14} className="text-red-400" />
+                     <span className="text-[10px] font-black text-red-400 uppercase tracking-wider">Kritis</span>
+                   </div>
+                   <p className="text-xs font-bold text-slate-300 leading-relaxed">Sektor C (Subang) memerlukan intervensi segera: penyemprotan hama + peningkatan irigasi 40%. Estimasi kerugian Rp 380jt jika tidak ditangani.</p>
+                 </div>
+               </div>
+             </Card>
           </div>
         )}
 
@@ -396,7 +1025,15 @@ const Dashboard = () => {
         {activeTab === 'drones' && (
           <div className="p-10 h-full overflow-y-auto custom-scrollbar bg-[#0b1730]">
              <header className="mb-10">
-               <h2 className="text-3xl font-black text-white tracking-tighter uppercase font-cyber italic">ANALISA ARMADA DRONE</h2>
+               <div className="flex items-center gap-4 mb-2">
+                 <h2 className="text-3xl font-black text-white tracking-tighter uppercase font-cyber italic">ANALISA ARMADA DRONE</h2>
+                 <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1.5">
+                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                   </svg>
+                   PRO
+                 </span>
+               </div>
                <p className="text-xs font-bold text-blue-400/70 uppercase tracking-widest mt-1">Status: Node-01 Armada AKTIF • Sinergi Agrikultur</p>
              </header>
 
@@ -517,6 +1154,12 @@ const Dashboard = () => {
         {activeTab === 'companies' && (
           <CompanyManagement />
         )}
+
+        {/* TAB 5: MANAJEMEN USER */}
+        {activeTab === 'users' && (
+          <UserManagement />
+        )}
+        </div>
       </main>
     </div>
   );
