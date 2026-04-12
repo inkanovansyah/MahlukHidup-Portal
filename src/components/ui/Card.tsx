@@ -1,32 +1,100 @@
-import React from 'react';
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
-interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-  variant?: 'white' | 'glass' | 'soft' | 'gradient';
-  padding?: boolean;
+import { cn } from "@/lib/utils"
+
+const cardVariants = cva(
+  "rounded-xl overflow-hidden transition-all duration-500",
+  {
+    variants: {
+      variant: {
+        default: "bg-white border border-slate-100 shadow-sm text-slate-800",
+        white: "bg-white border border-slate-100 shadow-sm text-slate-800",
+        dark: "bg-slate-900 text-white border border-slate-800 shadow-lg",
+        accent: "bg-emerald-500 text-white border-none shadow-md",
+        glass: "backdrop-blur-xl bg-white/60 shadow-sm border border-slate-200/50 text-slate-800",
+        soft: "bg-slate-50 border-none text-slate-800",
+        gradient: "bg-gradient-to-br from-emerald-50 to-sky-50 border border-slate-100 shadow-sm text-slate-800",
+      },
+      padding: {
+        default: "p-8",
+        true: "p-8",
+        false: "",
+        none: "",
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+      padding: "default",
+    },
+  }
+)
+
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof cardVariants> {
+  padding?: any
 }
 
-const Card: React.FC<CardProps> = ({ 
-  children, 
-  className = '', 
-  variant = 'white', 
-  padding = true 
-}) => {
-  const baseStyles = "rounded-xl overflow-hidden transition-all duration-500 border border-border-light";
-  
-  const variants = {
-    white: "bg-[#0d1f47] border-blue-900/40 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)] hover:shadow-[0_40px_70px_-15px_rgba(16,185,129,0.15)] hover:-translate-y-1",
-    glass: "backdrop-blur-xl bg-blue-950/60 shadow-xl border-blue-800/30",
-    soft: "bg-[#0b1730] border-none",
-    gradient: "bg-linear-to-br from-emerald-900/20 to-blue-900/20 border-blue-800/20 shadow-inner",
-  };
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant, padding, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(cardVariants({ variant, padding: padding === false ? "none" : (padding === true ? "true" : padding), className }))}
+      {...props}
+    />
+  )
+)
+Card.displayName = "Card"
 
-  return (
-    <div className={`${baseStyles} ${variants[variant]} ${padding ? 'p-8' : ''} ${className}`}>
-      {children}
-    </div>
-  );
-};
+const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("flex flex-col space-y-1.5 p-6", className)}
+      {...props}
+    />
+  )
+)
+CardHeader.displayName = "CardHeader"
 
-export default Card;
+const CardTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("font-semibold leading-none tracking-tight", className)}
+      {...props}
+    />
+  )
+)
+CardTitle.displayName = "CardTitle"
+
+const CardDescription = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("text-sm text-[var(--color-text-dim)]", className)}
+      {...props}
+    />
+  )
+)
+CardDescription.displayName = "CardDescription"
+
+const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  )
+)
+CardContent.displayName = "CardContent"
+
+const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("flex items-center p-6 pt-0", className)}
+      {...props}
+    />
+  )
+)
+CardFooter.displayName = "CardFooter"
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export default Card
