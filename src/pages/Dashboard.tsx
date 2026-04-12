@@ -1039,19 +1039,21 @@ const Dashboard = () => {
 
              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                {/* OVERALL HEALTH BENTO */}
-               <Card className="lg:col-span-12 xl:col-span-4 bg-slate-800 text-white border-none shadow-2xl flex flex-col justify-between" padding={true}>
-                  <div className="flex justify-between items-start mb-10">
-                    <div className="p-4 bg-emerald-500/20 text-emerald-400 rounded-lg"><ShieldCheck size={32} className="animate-pulse" /></div>
+               <Card className="lg:col-span-12 xl:col-span-4 bg-slate-900 text-white border-none shadow-2xl flex flex-col justify-between relative group" padding={true}>
+                  <img src="https://images.unsplash.com/photo-1675190541016-b6881606e991?q=80&w=1473&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay group-hover:scale-105 transition-transform duration-[3s]" alt="Drone Background" />
+                  
+                  <div className="flex justify-between items-start mb-10 relative z-10">
+                    <div className="p-4 bg-emerald-500/30 text-emerald-400 rounded-lg backdrop-blur-sm"><ShieldCheck size={32} className="animate-pulse" /></div>
                     <div className="text-right">
-                       <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Integritas Fleet</p>
-                       <p className="text-4xl font-black italic">94<span className="text-lg opacity-50">%</span></p>
+                       <p className="text-[10px] font-black text-white/70 uppercase tracking-widest drop-shadow-md">Integritas Fleet</p>
+                       <p className="text-4xl font-black italic drop-shadow-md">94<span className="text-lg opacity-80">%</span></p>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-black tracking-tight mb-2 uppercase font-cyber italic">Kesehatan Armada</h3>
-                    <p className="text-xs text-white/50 leading-relaxed font-medium">Sistem diagnostik mendeteksi optimalisasi pada 4/4 drone yang beroperasi.</p>
+                  <div className="relative z-10">
+                    <h3 className="text-xl font-black tracking-tight mb-2 uppercase font-cyber italic drop-shadow-md">Kesehatan Armada</h3>
+                    <p className="text-xs text-white/80 leading-relaxed font-medium drop-shadow-md">Sistem diagnostik mendeteksi optimalisasi pada 4/4 drone yang beroperasi.</p>
                   </div>
-                  <div className="mt-8 flex gap-2">
+                  <div className="mt-8 flex gap-2 relative z-10">
                      <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
                      <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
                      <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
