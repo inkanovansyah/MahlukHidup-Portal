@@ -11,13 +11,13 @@ const buttonVariants = cva(
       variant: {
         default: "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] shadow-[0_4px_12px_rgba(16,185,129,0.25)] hover:shadow-[0_8px_24px_rgba(16,185,129,0.4)]",
         primary: "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] shadow-[0_4px_12px_rgba(16,185,129,0.25)] hover:shadow-[0_8px_24px_rgba(16,185,129,0.4)]",
-        secondary: "bg-[var(--color-surface)] text-[var(--color-text-main)] border border-[var(--color-border-light)] hover:bg-[var(--color-bg-light)] shadow-sm",
+        secondary: "bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200 shadow-sm",
         ghost: "bg-transparent text-[var(--color-text-dim)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5",
         danger: "bg-red-500 text-white hover:bg-red-600 shadow-[0_4px_12px_rgba(239,68,68,0.2)]",
         destructive: "bg-red-500 text-white hover:bg-red-600 shadow-[0_4px_12px_rgba(239,68,68,0.2)]",
         glass: "bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/30",
         gradient: "bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white hover:opacity-90 shadow-lg",
-        outline: "border border-[var(--color-border-light)] bg-transparent hover:bg-[var(--color-bg-light)] text-[var(--color-text-main)]",
+        outline: "border border-slate-200 bg-transparent hover:bg-slate-50 text-slate-800",
       },
       size: {
         default: "px-6 py-3.5 text-sm",

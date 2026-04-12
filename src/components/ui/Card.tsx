@@ -8,11 +8,13 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[#0d1f47] border border-blue-900/40 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]",
-        white: "bg-[#0d1f47] border border-blue-900/40 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]",
-        glass: "backdrop-blur-xl bg-blue-950/60 shadow-xl border border-blue-800/30",
-        soft: "bg-[#0b1730] border-none",
-        gradient: "bg-linear-to-br from-emerald-900/20 to-blue-900/20 border border-blue-800/20 shadow-inner",
+        default: "bg-white border border-slate-100 shadow-sm text-slate-800",
+        white: "bg-white border border-slate-100 shadow-sm text-slate-800",
+        dark: "bg-slate-900 text-white border border-slate-800 shadow-lg",
+        accent: "bg-emerald-500 text-white border-none shadow-md",
+        glass: "backdrop-blur-xl bg-white/60 shadow-sm border border-slate-200/50 text-slate-800",
+        soft: "bg-slate-50 border-none text-slate-800",
+        gradient: "bg-gradient-to-br from-emerald-50 to-sky-50 border border-slate-100 shadow-sm text-slate-800",
       },
       padding: {
         default: "p-8",

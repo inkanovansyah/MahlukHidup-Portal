@@ -185,15 +185,15 @@ const CompanyManagement = () => {
 
   return (
     <>
-    <div className="p-4 md:p-6 lg:p-10 h-full overflow-y-auto custom-scrollbar bg-[#0b1730]">
+    <div className="p-4 md:p-6 lg:p-10 h-full overflow-y-auto custom-scrollbar bg-slate-50">
       {/* Header */}
       <div className="mb-6 md:mb-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase font-cyber italic">
+            <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter uppercase font-cyber italic">
               MANAJEMEN PERUSAHAAN
             </h2>
-            <p className="text-xs font-bold text-blue-400/70 uppercase tracking-widest mt-1">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">
               Kelola Perusahaan dan Cabang
             </p>
           </div>
@@ -224,13 +224,13 @@ const CompanyManagement = () => {
       {/* Search Bar */}
       <div className="mb-6">
         <div className="relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 z-10" />
           <Input
             type="text"
             placeholder="Cari perusahaan..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+            className="w-full bg-slate-800/50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
           />
         </div>
       </div>
@@ -246,7 +246,7 @@ const CompanyManagement = () => {
           {filteredCompanies.length === 0 ? (
             <Card className="text-center py-16">
               <Building2 size={48} className="mx-auto text-slate-500 mb-4" />
-              <p className="text-lg font-bold text-slate-400">Tidak ada perusahaan</p>
+              <p className="text-lg font-bold text-slate-500">Tidak ada perusahaan</p>
               <p className="text-sm text-slate-500 mt-2">Klik "Tambah Perusahaan" untuk memulai</p>
             </Card>
           ) : (
@@ -261,7 +261,7 @@ const CompanyManagement = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                          <h3 className="text-base md:text-lg font-black text-white uppercase font-cyber italic truncate">
+                          <h3 className="text-base md:text-lg font-black text-slate-800 uppercase font-cyber italic truncate">
                             {company.name}
                           </h3>
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
@@ -270,8 +270,8 @@ const CompanyManagement = () => {
                             {company.isActive ? 'Aktif' : 'Nonaktif'}
                           </span>
                         </div>
-                        <p className="text-xs text-blue-400/70 font-bold mt-0.5">Kode: {company.code}</p>
-                        <div className="flex flex-wrap gap-3 mt-2 text-xs text-slate-400">
+                        <p className="text-xs text-slate-500 font-bold mt-0.5">Kode: {company.code}</p>
+                        <div className="flex flex-wrap gap-3 mt-2 text-xs text-slate-500">
                           {company.email && (
                             <span className="truncate">{company.email}</span>
                           )}
@@ -300,7 +300,7 @@ const CompanyManagement = () => {
                       </button>
                       <button
                         onClick={() => toggleExpand(company.id)}
-                        className="p-2 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg transition-colors text-slate-400 hover:text-slate-300"
+                        className="p-2 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg transition-colors text-slate-500 hover:text-slate-600"
                         title="Lihat Cabang"
                       >
                         {expandedCompany === company.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -310,9 +310,9 @@ const CompanyManagement = () => {
 
                   {/* Branches Section */}
                   {expandedCompany === company.id && (
-                    <div className="mt-6 pt-6 border-t border-blue-800/30">
+                    <div className="mt-6 pt-6 border-t border-slate-200">
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
                           <MapPin size={14} className="text-emerald-400" />
                           Daftar Cabang ({company.branches?.length || 0})
                         </h4>
@@ -341,7 +341,7 @@ const CompanyManagement = () => {
                       ) : (
                         <div className="text-center py-8 bg-slate-800/30 rounded-xl">
                           <MapPin size={32} className="mx-auto text-slate-500 mb-2" />
-                          <p className="text-sm text-slate-400 font-bold">Belum ada cabang</p>
+                          <p className="text-sm text-slate-500 font-bold">Belum ada cabang</p>
                         </div>
                       )}
                     </div>
@@ -356,19 +356,19 @@ const CompanyManagement = () => {
 
       {/* Company Modal */}
       <Dialog open={showCompanyModal} onOpenChange={setShowCompanyModal}>
-        <DialogContent className="max-w-2xl bg-[#0d1f47] border border-blue-800/40 text-white rounded-2xl">
+        <DialogContent className="max-w-2xl bg-white border border-blue-800/40 text-slate-800 rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-lg md:text-xl font-black text-white uppercase font-cyber italic">
+            <DialogTitle className="text-lg md:text-xl font-black text-slate-800 uppercase font-cyber italic">
               {editingCompany ? 'Edit Perusahaan' : 'Tambah Perusahaan'}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSaveCompany} className="space-y-4">
+          <form onSubmit={handleSaveCompany} className="space-y-4 px-4 md:px-6 pb-2">
             <FormField label="Nama Perusahaan" required>
               <Input
                 type="text"
                 value={companyForm.name}
                 onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
               />
             </FormField>
@@ -378,7 +378,7 @@ const CompanyManagement = () => {
                 type="text"
                 value={companyForm.code}
                 onChange={(e) => setCompanyForm({ ...companyForm, code: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
                 disabled={!!editingCompany}
               />
@@ -388,7 +388,7 @@ const CompanyManagement = () => {
               <textarea
                 value={companyForm.address || ''}
                 onChange={(e) => setCompanyForm({ ...companyForm, address: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 resize-none"
+                className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 resize-none"
                 rows={2}
               />
             </FormField>
@@ -399,7 +399,7 @@ const CompanyManagement = () => {
                   type="email"
                   value={companyForm.email || ''}
                   onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                  className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
 
@@ -408,7 +408,7 @@ const CompanyManagement = () => {
                   type="text"
                   value={companyForm.phone || ''}
                   onChange={(e) => setCompanyForm({ ...companyForm, phone: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                  className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
             </div>
@@ -417,7 +417,7 @@ const CompanyManagement = () => {
               <textarea
                 value={companyForm.description || ''}
                 onChange={(e) => setCompanyForm({ ...companyForm, description: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 resize-none"
+                className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 resize-none"
                 rows={2}
               />
             </FormField>
@@ -437,19 +437,19 @@ const CompanyManagement = () => {
 
       {/* Branch Modal */}
       <Dialog open={showBranchModal && !!selectedCompanyId} onOpenChange={(open) => { if (!open) setShowBranchModal(false); }}>
-        <DialogContent className="max-w-2xl bg-[#0d1f47] border border-blue-800/40 text-white rounded-2xl">
+        <DialogContent className="max-w-2xl bg-white border border-blue-800/40 text-slate-800 rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-lg md:text-xl font-black text-white uppercase font-cyber italic">
+            <DialogTitle className="text-lg md:text-xl font-black text-slate-800 uppercase font-cyber italic">
               {editingBranch ? 'Edit Cabang' : 'Tambah Cabang'}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSaveBranch} className="space-y-4">
+          <form onSubmit={handleSaveBranch} className="space-y-4 px-4 md:px-6 pb-2">
             <FormField label="Nama Cabang" required>
               <Input
                 type="text"
                 value={branchForm.name}
                 onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
               />
             </FormField>
@@ -459,7 +459,7 @@ const CompanyManagement = () => {
                 type="text"
                 value={branchForm.code}
                 onChange={(e) => setBranchForm({ ...branchForm, code: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 required
                 disabled={!!editingBranch}
               />
@@ -469,7 +469,7 @@ const CompanyManagement = () => {
               <textarea
                 value={branchForm.address || ''}
                 onChange={(e) => setBranchForm({ ...branchForm, address: e.target.value })}
-                className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 resize-none"
+                className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 resize-none"
                 rows={2}
               />
             </FormField>
@@ -480,7 +480,7 @@ const CompanyManagement = () => {
                   type="email"
                   value={branchForm.email || ''}
                   onChange={(e) => setBranchForm({ ...branchForm, email: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                  className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
 
@@ -489,7 +489,7 @@ const CompanyManagement = () => {
                   type="text"
                   value={branchForm.phone || ''}
                   onChange={(e) => setBranchForm({ ...branchForm, phone: e.target.value })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                  className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
             </div>
@@ -501,7 +501,7 @@ const CompanyManagement = () => {
                   step="any"
                   value={branchForm.latitude || ''}
                   onChange={(e) => setBranchForm({ ...branchForm, latitude: e.target.value ? parseFloat(e.target.value) : undefined })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                  className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
 
@@ -511,7 +511,7 @@ const CompanyManagement = () => {
                   step="any"
                   value={branchForm.longitude || ''}
                   onChange={(e) => setBranchForm({ ...branchForm, longitude: e.target.value ? parseFloat(e.target.value) : undefined })}
-                  className="w-full bg-slate-800/50 border border-blue-800/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
+                  className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 h-auto"
                 />
               </FormField>
             </div>
@@ -535,7 +535,7 @@ const CompanyManagement = () => {
 // Branch Card Component
 const BranchCard = ({ branch, onEdit, onDelete }: { branch: BranchDto; onEdit: () => void; onDelete: () => void }) => {
   return (
-    <div className={`p-4 bg-slate-800/30 rounded-xl border ${branch.isActive ? 'border-blue-800/30' : 'border-red-800/30 opacity-60'} transition-all hover:border-emerald-500/20`}>
+    <div className={`p-4 bg-slate-800/30 rounded-xl border ${branch.isActive ? 'border-slate-200' : 'border-red-800/30 opacity-60'} transition-all hover:border-emerald-500/20`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <div className="w-8 h-8 bg-sky-500/20 text-sky-400 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -543,15 +543,15 @@ const BranchCard = ({ branch, onEdit, onDelete }: { branch: BranchDto; onEdit: (
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h5 className="text-sm font-bold text-white truncate">{branch.name}</h5>
+              <h5 className="text-sm font-bold text-slate-800 truncate">{branch.name}</h5>
               <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
                 branch.isActive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
               }`}>
                 {branch.isActive ? 'Aktif' : 'Nonaktif'}
               </span>
             </div>
-            <p className="text-xs text-blue-400/70 font-bold mt-0.5">Kode: {branch.code}</p>
-            <div className="flex flex-wrap gap-2 mt-1 text-xs text-slate-400">
+            <p className="text-xs text-slate-500 font-bold mt-0.5">Kode: {branch.code}</p>
+            <div className="flex flex-wrap gap-2 mt-1 text-xs text-slate-500">
               {branch.address && (
                 <span className="truncate">{branch.address}</span>
               )}
@@ -584,7 +584,7 @@ const BranchCard = ({ branch, onEdit, onDelete }: { branch: BranchDto; onEdit: (
 const FormField = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => {
   return (
     <div>
-      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
         {label} {required && <span className="text-red-400">*</span>}
       </label>
       {children}

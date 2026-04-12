@@ -6,12 +6,12 @@
   --color-primary-dark: #059669;
   --color-secondary: #0ea5e9; /* Sky Blue / Drone */
   --color-accent: #f59e0b; /* Amber / Harvesting */
-  --color-bg-light: #0b1730;    /* Dark Navy */
-  --color-bg-dark: #0d1c3a;     /* Slightly deeper Navy */
-  --color-surface: #0f2047;     /* Navy card surface */
-  --color-text-main: #e2e8f0;   /* Slate 200 for dark bg */
-  --color-text-dim: #94a3b8;    /* Slate 400 */
-  --color-border-light: rgba(30, 58, 138, 0.4); /* Navy border */
+  --color-bg-light: #f8fafc;    /* Slate-50 — Light background */
+  --color-bg-dark: #f1f5f9;     /* Slate-100 — Slightly darker light */
+  --color-surface: #ffffff;     /* White card surface */
+  --color-text-main: #1e293b;   /* Slate 800 for light bg */
+  --color-text-dim: #64748b;    /* Slate 500 */
+  --color-border-light: rgba(226, 232, 240, 1); /* Slate-200 border */
   
   --font-outfit: "Outfit", sans-serif;
   --font-cyber: "Manrope", sans-serif;
@@ -25,17 +25,14 @@ body {
   font-family: var(--font-outfit);
   overflow-x: hidden;
   min-height: 100vh;
-  background-image: 
-    radial-gradient(at top left, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
-    radial-gradient(at bottom right, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
 }
 
 .glass {
-  background-color: rgba(15, 32, 71, 0.7);
+  background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(30, 64, 175, 0.3);
-  box-shadow: 0 10px 30px -5px rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
   border-radius: 1.5rem;
 }
 
@@ -43,7 +40,7 @@ body {
   width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(15, 32, 71, 0.5);
+  background: rgba(241, 245, 249, 0.8);
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
@@ -61,7 +58,7 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d1c3a;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-primary-dark);
