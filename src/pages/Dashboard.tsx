@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import MapView from '../components/ui/MapView';
+import MobileNav from '../components/ui/MobileNav';
 import CompanyManagement from './CompanyManagement';
 import UserManagement from './UserManagement';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart as RechartsBarChart, Bar, LineChart, Line } from 'recharts';
@@ -296,10 +297,19 @@ const Dashboard = () => {
       {/* CONTENT AREA */}
       <main className="relative flex-1 h-full overflow-hidden bg-slate-50 flex flex-col">
 
+        {/* Mobile Navigation */}
+        <MobileNav
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onLogout={handleLogout}
+          userName={user?.name}
+          userRole={user?.role}
+        />
+
         {/* TOP NAVBAR */}
         <header className="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 lg:px-6 flex-shrink-0 z-40">
           {/* Left: Page Title */}
-          <div>
+          <div className="pl-12 lg:pl-0">
             <h2 className="text-sm font-black text-white uppercase font-cyber italic tracking-tight">
               {activeTab === 'monitoring' && 'MONITOR GEOSPASIAL'}
               {activeTab === 'analytics' && 'ANALITIK KESELURUHAN'}
