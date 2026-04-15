@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import {
-  Sprout, Globe, Power, ChevronRight, Navigation,
+  Sprout, Globe, ChevronRight, Navigation,
   BarChart3, AlertTriangle, ShieldCheck, CheckCircle2,
   Zap, Droplet, Leaf, Layers, Coins,
   Info, Camera, Sparkles, TrendingUp, TrendingDown, ThermometerSun,
   Bug, FlaskConical, Building2, Wheat, AlertOctagon,
-  Clock, ArrowUpRight, ArrowDownRight, Eye, Activity, MapPin, Users, Sun, ChevronDown
+  Clock, ArrowUpRight, ArrowDownRight, Eye, Activity, MapPin, Sun, ChevronDown
 } from 'lucide-react';
-import { useAuthStore } from '../store/useAuthStore';
-import { useNavigate } from 'react-router-dom';
+
+import { useLocation } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import MapView from '../components/ui/MapView';
-import CompanyManagement from './CompanyManagement';
-import UserManagement from './UserManagement';
+import DashboardLayout from '../components/DashboardLayout';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart as RechartsBarChart, Bar, LineChart, Line } from 'recharts';
 
 const mockMarkers: any[] = [
@@ -229,16 +228,31 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const Dashboard = () => {
-  const { logout, user } = useAuthStore();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('monitoring');
+
+  const location = useLocation();
   const [activeSector, setActiveSector] = useState(mockMarkers[0]);
   const [mounted, setMounted] = useState(false);
   const [weatherOpen, setWeatherOpen] = useState(true);
 
   useEffect(() => { setMounted(true); }, []);
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const navItems = [
+    { id: 'monitoring', label: 'Monitor Geospasial', icon: Globe, path: '/dashboard' },
+    { id: 'analytics', label: 'Analitik Keseluruhan', icon: BarChart3, path: '/analytics' },
+    { id: 'drones', label: 'Analisa Drone', icon: Navigation, path: '/drones', pro: true },
+    { id: 'solar', label: 'Analisa Panel Surya', icon: Sun, path: '/solar', pro: true },
+    { id: 'companies', label: 'Manajemen Perusahaan', icon: Building2, path: '/companies' },
+  ];
+
+  const getActiveTab = () => {
+    const path = location.pathname;
+    if (path === '/companies') return 'companies';
+    if (path.includes('/branch')) return 'companies';
+    const item = navItems.find(n => n.path === path);
+    return item ? item.id : 'monitoring';
+  };
+
+  const currentActiveTab = getActiveTab();
 
   if (!mounted) return <div className="h-screen w-full bg-slate-50 flex items-center justify-center"><Sprout className="text-emerald-500 animate-bounce" size={48} /></div>;
 
@@ -251,95 +265,18 @@ const Dashboard = () => {
     }
   };
 
+  const pageTitles: Record<string, string> = {
+    monitoring: 'MONITOR GEOSPASIAL',
+    analytics: 'ANALITIK KESELURUHAN',
+    drones: 'ANALISA ARMADA DRONE',
+    solar: 'ANALISA PANEL SURYA',
+  };
+
   return (
-    <div className="h-screen w-full bg-slate-50 flex text-slate-800 font-outfit overflow-hidden relative">
-      {/* SOLID SIDEBAR */}
-      <aside className="w-16 lg:w-56 h-screen z-50 bg-slate-900 border-r border-slate-800 flex flex-col py-6 transition-all duration-700 flex-shrink-0 shadow-md shadow-black/30 relative">
-        <div className="flex items-center gap-3 mb-8 px-5">
-          <div className="w-9 h-9 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0">
-            <Sprout size={20} />
-          </div>
-          <div className="hidden lg:block">
-            <h1 className="font-black text-base tracking-tighter text-white leading-none font-cyber italic">MH <span className="text-emerald-400">PRO</span></h1>
-            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-0.5 italic">Intelligence</p>
-          </div>
-        </div>
-
-        <nav className="flex-1 w-full space-y-1 px-3">
-          {[
-            { id: 'monitoring', label: 'Monitor Geospasial', icon: Globe, action: () => setActiveTab('monitoring') },
-            { id: 'analytics', label: 'Analitik Keseluruhan', icon: BarChart3, action: () => setActiveTab('analytics') },
-            { id: 'drones', label: 'Analisa Drone', icon: Navigation, action: () => setActiveTab('drones'), pro: true },
-            { id: 'solar', label: 'Analisa Panel Surya', icon: Sun, action: () => setActiveTab('solar'), pro: true },
-            { id: 'companies', label: 'Manajemen Perusahaan', icon: Building2, action: () => setActiveTab('companies') },
-            { id: 'users', label: 'Manajemen User', icon: Users, action: () => setActiveTab('users') },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={item.action}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-500 group relative ${activeTab === item.id ? 'bg-slate-800 text-emerald-400 shadow-sm border border-slate-700' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'}`}
-            >
-              <item.icon size={18} className={`flex-shrink-0 ${activeTab === item.id ? 'scale-110' : 'group-hover:rotate-12 outline-none'} transition-transform`} />
-              <span className="hidden lg:block font-bold text-xs tracking-wide">{item.label}</span>
-              {item.pro && <span className="hidden lg:inline-flex ml-auto px-1.5 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-[7px] font-black text-white uppercase tracking-widest rounded-full">PRO</span>}
-            </button>
-          ))}
-        </nav>
-
-        <div className="mt-auto px-3 pt-4 border-t border-slate-800">
-          <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-800 text-center">
-            <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">v2.6.0-PRO</p>
-          </div>
-        </div>
-      </aside>
-
-      {/* CONTENT AREA */}
-      <main className="relative flex-1 h-full overflow-hidden bg-slate-50 flex flex-col">
-
-        {/* TOP NAVBAR */}
-        <header className="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 lg:px-6 flex-shrink-0 z-40">
-          {/* Left: Page Title */}
-          <div>
-            <h2 className="text-sm font-black text-white uppercase font-cyber italic tracking-tight">
-              {activeTab === 'monitoring' && 'MONITOR GEOSPASIAL'}
-              {activeTab === 'analytics' && 'ANALITIK KESELURUHAN'}
-              {activeTab === 'drones' && 'ANALISA ARMADA DRONE'}
-              {activeTab === 'companies' && 'MANAJEMEN PERUSAHAAN'}
-              {activeTab === 'users' && 'MANAJEMEN USER'}
-              {activeTab === 'solar' && 'ANALISA PANEL SURYA'}
-            </h2>
-          </div>
-
-          {/* Right: User Info + Logout */}
-          <div className="flex items-center gap-3">
-            {user && (
-              <div className="flex items-center gap-3">
-                <div className="hidden sm:flex items-center gap-2 pr-3">
-                  <div className="text-right">
-                    <p className="text-[10px] font-bold text-slate-200 truncate leading-tight">{user.name}</p>
-                    <p className="text-[8px] text-emerald-400 font-black uppercase tracking-wider">{user.role}</p>
-                  </div>
-                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-sky-500 rounded-full flex items-center justify-center text-slate-900 text-[10px] font-black shadow-lg shadow-emerald-500/20 flex-shrink-0">
-                    {user.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg transition-all text-red-400 hover:text-red-300 group"
-                  title="Logout"
-                >
-                  <Power size={14} className="group-hover:scale-110 transition-transform" />
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
-
-        {/* Content Scroll Area */}
-        <div className="flex-1 overflow-hidden">
-        
+    <DashboardLayout pageTitle={pageTitles[currentActiveTab] || 'DASHBOARD'}>
+      <div className="flex-1 h-full overflow-hidden flex flex-col">
         {/* TAB 1: MONITORING GEOSPASIAL */}
-        {activeTab === 'monitoring' && (
+        {currentActiveTab === 'monitoring' && (
           <div className="relative h-full w-full">
             {/* FULL SCREEN MAP */}
             <div className="absolute inset-0 z-0">
@@ -353,7 +290,7 @@ const Dashboard = () => {
             </div>
 
             {/* WEATHER MONITORING OVERLAY */}
-            <div className="absolute top-4 left-4 z-40 w-[280px]">
+            <div className="absolute top-2 left-2 md:top-4 md:left-4 z-40 w-[calc(100%-16px)] md:w-[280px]">
               <div className="backdrop-blur-xl bg-slate-900/85 border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
                 {/* Header — always visible */}
                 <div className="px-4 py-3 flex items-center justify-between cursor-pointer select-none" onClick={() => setWeatherOpen(!weatherOpen)}>
@@ -450,7 +387,7 @@ const Dashboard = () => {
 
             {/* SECTOR DETAILS FLOATING CARD (High Glassmorphism) */}
             {activeSector && (
-              <div className="absolute right-6 top-6 bottom-6 w-[450px] z-40 bg-slate-50/70 backdrop-blur-2xl shadow-[0_30px_60px_rgba(0,0,0,0.4)] rounded-3xl border border-blue-700/30 flex flex-col pointer-events-auto p-6 pt-8 overflow-y-auto custom-scrollbar">
+              <div className="fixed md:absolute inset-0 md:inset-auto md:right-6 md:top-6 md:bottom-6 w-full md:w-[450px] z-[70] md:z-40 bg-slate-50 md:bg-slate-50/70 backdrop-blur-2xl shadow-[0_30px_60px_rgba(0,0,0,0.4)] rounded-none md:rounded-3xl border-none md:border md:border-blue-700/30 flex flex-col pointer-events-auto p-6 pt-8 overflow-y-auto custom-scrollbar">
                 
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
@@ -579,9 +516,9 @@ const Dashboard = () => {
         )}
 
         {/* TAB 2: ANALITIK KESELURUHAN */}
-        {activeTab === 'analytics' && (
-          <div className="p-6 lg:p-10 h-full overflow-y-auto custom-scrollbar bg-slate-50">
-             <header className="mb-10">
+        {currentActiveTab === 'analytics' && (
+          <div className="p-4 lg:p-6 h-full overflow-y-auto custom-scrollbar bg-slate-50">
+             <header className="mb-6">
                <div className="flex items-center gap-4 mb-2">
                  <h2 className="text-3xl font-black text-slate-800 tracking-tighter uppercase font-cyber italic">ANALITIK KESELURUHAN</h2>
                  <span className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-sky-500 text-slate-800 text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-emerald-500/30 flex items-center gap-1.5">
@@ -593,7 +530,7 @@ const Dashboard = () => {
              </header>
 
              {/* ROW 1: KPI CARDS - 6 Metrics (computed from mockMarkers) */}
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-5">
                 <Card className="hover:border-emerald-500/30 transition-all group" padding={true}>
                    <div className="flex justify-between items-start">
                      <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-lg group-hover:scale-110 transition-transform"><Coins size={18} /></div>
@@ -657,7 +594,7 @@ const Dashboard = () => {
              </div>
 
              {/* ROW 1.5: DETAIL PER LAHAN */}
-             <div className="mb-8">
+             <div className="mb-5">
                <div className="flex items-center gap-3 mb-4">
                  <MapPin size={16} className="text-emerald-400" />
                  <h3 className="font-black text-sm tracking-widest uppercase text-slate-800 italic">Detail per Lahan</h3>
@@ -711,7 +648,7 @@ const Dashboard = () => {
                      </div>
 
                      {/* Content Grid */}
-                     <div className="p-5 grid grid-cols-2 gap-4">
+                     <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                        {/* Tanah */}
                        <div className="p-3 bg-slate-100 rounded-lg border border-slate-200">
                          <div className="flex items-center gap-1.5 mb-2">
@@ -1114,9 +1051,9 @@ const Dashboard = () => {
         )}
 
         {/* TAB 3: ANALISA DRONE */}
-        {activeTab === 'drones' && (
-          <div className="p-10 h-full overflow-y-auto custom-scrollbar bg-slate-50">
-             <header className="mb-10">
+        {currentActiveTab === 'drones' && (
+          <div className="p-4 lg:p-6 h-full overflow-y-auto custom-scrollbar bg-slate-50">
+             <header className="mb-6">
                <div className="flex items-center gap-4 mb-2">
                  <h2 className="text-3xl font-black text-slate-800 tracking-tighter uppercase font-cyber italic">ANALISA ARMADA DRONE</h2>
                  <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-800 text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1.5">
@@ -1129,7 +1066,7 @@ const Dashboard = () => {
                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Status: Node-01 Armada AKTIF • Sinergi Agrikultur</p>
              </header>
 
-             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                {/* OVERALL HEALTH BENTO */}
                <Card className="lg:col-span-12 xl:col-span-4 bg-slate-900 text-slate-800 border-none shadow-md flex flex-col justify-between relative group" padding={true}>
                   <img src="https://images.unsplash.com/photo-1675190541016-b6881606e991?q=80&w=1473&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay group-hover:scale-105 transition-transform duration-[3s]" alt="Drone Background" />
@@ -1194,7 +1131,7 @@ const Dashboard = () => {
 
                {/* TASK MANAGEMENT BENTO (Bottom Left) */}
                <Card className="lg:col-span-12 xl:col-span-7" padding={true}>
-                  <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center justify-between mb-6">
                     <h3 className="font-black text-sm tracking-widest uppercase italic underline decoration-emerald-500/30 text-slate-800">Tugas Terjadwal</h3>
                     <Button variant="ghost" size="sm" className="text-[10px] font-black tracking-widest uppercase">Lihat Historical</Button>
                   </div>
@@ -1229,12 +1166,12 @@ const Dashboard = () => {
                {/* QUICK ACTION BENTO (Bottom Right) */}
                <Card className="lg:col-span-12 xl:col-span-5 bg-white shadow-sm relative overflow-hidden group border-none" padding={false}>
                   <img src="/premium_agri_hub_3d_banner_1775291690359.png" className="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:scale-110 transition-transform duration-[3s]" />
-                  <div className="relative p-10 h-full flex flex-col justify-between">
+                  <div className="relative p-6 h-full flex flex-col justify-between">
                      <div>
                        <h3 className="text-2xl font-black text-slate-800 tracking-tighter italic uppercase">Sistem Kontrol</h3>
                        <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-xs mt-2 italic">Gunakan kendali otomatis untuk memulai misi pemantauan baru secara instan di sektor terdaftar.</p>
                      </div>
-                     <div className="mt-10 flex flex-col gap-3">
+                     <div className="mt-6 flex flex-col gap-3">
                         <Button variant="primary" fullWidth className="py-5 text-sm tracking-widest uppercase rounded-xl">Mulai Misi Baru</Button>
                         <Button variant="secondary" fullWidth className="py-5 text-sm tracking-widest uppercase rounded-xl">Mulai Patroli Hama</Button>
                      </div>
@@ -1245,9 +1182,9 @@ const Dashboard = () => {
         )}
 
         {/* TAB 4: ANALISA PANEL SURYA */}
-        {activeTab === 'solar' && (
-          <div className="p-10 h-full overflow-y-auto custom-scrollbar bg-slate-50">
-             <header className="mb-10">
+        {currentActiveTab === 'solar' && (
+          <div className="p-4 lg:p-6 h-full overflow-y-auto custom-scrollbar bg-slate-50">
+             <header className="mb-6">
                <div className="flex items-center gap-4 mb-2">
                  <h2 className="text-3xl font-black text-slate-800 tracking-tighter uppercase font-cyber italic">ANALISA PANEL SURYA</h2>
                  <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1.5">
@@ -1378,19 +1315,8 @@ const Dashboard = () => {
              </div>
           </div>
         )}
-
-        {/* TAB 5: MANAJEMEN PERUSAHAAN */}
-        {activeTab === 'companies' && (
-          <CompanyManagement />
-        )}
-
-        {/* TAB 6: MANAJEMEN USER */}
-        {activeTab === 'users' && (
-          <UserManagement />
-        )}
-        </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

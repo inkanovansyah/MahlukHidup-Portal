@@ -12,6 +12,8 @@ export interface LoginResponse {
       name: string;
       email: string;
       role: string;
+      companyId?: string;
+      branchId?: string;
     };
   };
 }
@@ -21,4 +23,9 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  companyId?: string;
+  branchId?: string;
+  isActive?: boolean;
+  lastLogin?: string;
+  createdAt?: string;
 }
