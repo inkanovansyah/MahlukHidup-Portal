@@ -5,6 +5,10 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import CompanyManagement from './pages/CompanyManagement';
 import BranchDetail from './pages/BranchDetail';
+import SaprotanRequest from './pages/SaprotanRequest';
+import AssetRequest from './pages/AssetRequest';
+import UserManagement from './pages/UserManagement';
+import BranchManagement from './pages/BranchManagement';
 import { useAuthStore } from './store/useAuthStore';
 
 const queryClient = new QueryClient();
@@ -66,6 +70,38 @@ function App() {
             element={
               <ProtectedRoute>
                 <BranchDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/saprotan"
+            element={
+              <ProtectedRoute>
+                <SaprotanRequest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assets"
+            element={
+              <ProtectedRoute>
+                <AssetRequest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <UserManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/branches"
+            element={
+              <ProtectedRoute>
+                <BranchManagement />
               </ProtectedRoute>
             }
           />

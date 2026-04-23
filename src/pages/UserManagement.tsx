@@ -3,6 +3,7 @@ import {
   Users, Plus, Edit2, Trash2, X, Check, Search,
   AlertCircle, Mail, Shield, UserCheck, UserX, Key
 } from 'lucide-react';
+import DashboardLayout from '../components/DashboardLayout';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Input } from '../components/ui/input';
@@ -121,7 +122,7 @@ const UserManagement = () => {
   };
 
   return (
-    <>
+    <DashboardLayout pageTitle="Manajemen User">
     <div className="p-4 md:p-6 lg:p-10 h-full overflow-y-auto custom-scrollbar bg-slate-50">
       {/* Header */}
       <div className="mb-6 md:mb-10">
@@ -385,7 +386,7 @@ const UserManagement = () => {
           </form>
         </DialogContent>
       </Dialog>
-    </>
+    </DashboardLayout>
   );
 };
 

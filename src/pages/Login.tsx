@@ -67,6 +67,7 @@ const Login = () => {
           name: response.data.user.name,
           email: response.data.user.email,
           role: response.data.user.role,
+          jobLevelRank: response.data.user.jobLevelRank,
         });
         navigate('/dashboard');
       } else {

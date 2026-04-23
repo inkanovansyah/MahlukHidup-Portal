@@ -25,6 +25,7 @@ export interface User {
   role: string;
   companyId?: string;
   branchId?: string;
+  jobLevelRank?: number;
   isActive?: boolean;
   lastLogin?: string;
   createdAt?: string;
